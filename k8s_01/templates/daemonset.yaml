@@ -37,10 +37,6 @@ spec:
             path: /var/log/pods
             type: Directory
           name: host-var-log-pods
-        - hostPath:
-            path: /var/lib/docker/containers
-            type: Directory
-          name: host-var-lib-docker-containers
       containers:
         - name: kubelogreader
           image: "{{.Values.image.repository}}/{{.Values.image.path}}:{{.Chart.Version}}"
@@ -58,7 +54,5 @@ spec:
               mountPath: /var/log/containers
             - name: host-var-log-pods
               mountPath: /var/log/pods
-            - name: host-var-lib-docker-containers
-              mountPath: /var/lib/docker/containers
           command: ["/usr/bin/bash"]
           args: ["-c", "cd /opt/teragrep/k8s_01 || exit 1; exec /usr/bin/java -Dlog4j2.configurationFile=file:/opt/teragrep/k8s_01/etc/log4j2.xml -jar lib/k8s_01.jar"]
