@@ -17,7 +17,7 @@
     "terminationGracePeriodSeconds": 0,
     "containers": [
       {
-        "image": "rockylinux:8",
+        "image": "rockylinux/rockylinux:9",
         "imagePullPolicy": "IfNotPresent",
         "name": "fourth-pod",
         "command": [
