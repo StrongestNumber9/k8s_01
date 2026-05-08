@@ -1,4 +1,4 @@
-FROM rockylinux:8
+FROM rockylinux/rockylinux:9
 COPY rpm/target/rpm/com.teragrep-k8s_01/RPMS/noarch/com.teragrep-k8s_01-*.rpm /rpm/
 RUN dnf -y install /rpm/*.rpm && dnf clean all
 VOLUME /opt/teragrep/k8s_01/var
