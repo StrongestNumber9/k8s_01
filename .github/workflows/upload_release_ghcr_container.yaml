@@ -1,0 +1,48 @@
+name: Build and upload GHCR container
+
+on:
+  workflow_run:
+    workflows: ["Upload Artifact as GitHub Release Attachment"]
+    types: [completed]
+
+jobs:
+  upload_container:
+    name: Upload Container
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: artifact
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: rpm
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lowercase repository name
+        run: echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
+      - name: Build images
+        run: |
+          set -e;
+          podman build --tag ghcr.io/${{ env.REPO_LC }}:${{ github.event.release.tag_name }} --tag ghcr.io/${{ env.REPO_LC }}:latest .
+          for tag in "${{ github.event.release.tag_name }}" latest; do
+            podman push "ghcr.io/${{ env.REPO_LC }}:${tag}" &
+          done;
+          wait;

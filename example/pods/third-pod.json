@@ -18,7 +18,7 @@
     "terminationGracePeriodSeconds": 0,
     "containers": [
       {
-        "image": "rockylinux:8",
+        "image": "rockylinux/rockylinux:9",
         "imagePullPolicy": "IfNotPresent",
         "name": "third-pod-one",
         "command": [
@@ -30,7 +30,7 @@
         ]
       },
       {
-        "image": "rockylinux:8",
+        "image": "rockylinux/rockylinux:9",
         "imagePullPolicy": "IfNotPresent",
         "name": "third-pod-two",
         "command": [
@@ -42,7 +42,7 @@
         ]
       },
       {
-        "image": "rockylinux:8",
+        "image": "rockylinux/rockylinux:9",
         "imagePullPolicy": "IfNotPresent",
         "name": "third-pod-three",
         "command": [
