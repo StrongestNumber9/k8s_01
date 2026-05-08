@@ -47,9 +47,10 @@ jobs:
 
       - name: Attach rpm to release
         uses: softprops/action-gh-release@v2
-        files: |
-          rpm/target/rpm/com.teragrep-k8s_01/RPMS/noarch/com.teragrep-k8s_01-*.noarch.rpm
-          k8s_01-*.tgz
+        with:
+          files: |
+            rpm/target/rpm/com.teragrep-k8s_01/RPMS/noarch/com.teragrep-k8s_01-*.noarch.rpm
+            k8s_01-*.tgz
 
       - name: Update pkg_01 releases repository
         uses: teragrep/dfg_01@5.0.0
