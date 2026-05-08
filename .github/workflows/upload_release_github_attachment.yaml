@@ -83,6 +83,6 @@ jobs:
           set -e;
           podman build --tag ghcr.io/${{ env.REPO_LC }}:${{ github.event.release.tag_name }} --tag ghcr.io/${{ env.REPO_LC }}:latest .
           for tag in "${{ github.event.release.tag_name }}" latest; do
-            podman push "ghcr.io/${{ env.REPO_LC }}:${tag}" &;
+            podman push "ghcr.io/${{ env.REPO_LC }}:${tag}" &
           done;
           wait;
