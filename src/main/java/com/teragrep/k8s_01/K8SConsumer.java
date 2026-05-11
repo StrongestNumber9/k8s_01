@@ -18,9 +18,7 @@
 package com.teragrep.k8s_01;
 
 import com.teragrep.rlo_14.*;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.teragrep.k8s_01.config.AppConfig;
 import com.teragrep.k8s_01.metadata.KubernetesMetadata;
 import com.teragrep.k8s_01.metadata.NamespaceMetadataContainer;
@@ -36,6 +34,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Consumer;
@@ -46,7 +45,6 @@ import java.util.regex.Pattern;
  */
 public class K8SConsumer implements Consumer<FileRecord> {
     private static final Logger LOGGER = LoggerFactory.getLogger(K8SConsumer.class);
-    private static final Gson gson = new Gson();
     private final AppConfig appConfig;
     private final KubernetesCachingAPIClient cacheClient;
 
@@ -107,59 +105,17 @@ public class K8SConsumer implements Consumer<FileRecord> {
             String namespace = ContainerInfo.getNamespace(record.getFilename());
             String podname = ContainerInfo.getPodname(record.getFilename());
             String containerId = ContainerInfo.getContainerID(record.getFilename());
-            KubernetesLogFilePOJO log;
-            try {
-                // We want to read the kubernetes log event into a POJO
-                log = gson.fromJson(new String(record.getRecord(), StandardCharsets.UTF_8), KubernetesLogFilePOJO.class);
-            } catch (JsonParseException e) {
-                LOGGER.trace(
-                        "[{}] Invalid syntax message: {}",
-                        uuid,
-                        new String(record.getRecord(), StandardCharsets.UTF_8)
-                );
-                throw new RuntimeException(
-                        String.format(
-                                "[%s] Event from pod <%s>/<%s> on container <%s> in file <%s> offset <%s> can't be parsed properly: %s",
-                                uuid,
-                                namespace,
-                                podname,
-                                containerId,
-                                record.getPath(),
-                                record.getStartOffset(),
-                                e.getMessage()
-                        )
-                );
-            }
-
-            // Log is in invalid format if timestamp is not available
-            if(log == null || log.getTimestamp() == null) {
-                LOGGER.debug(
-                        "[{}] Can't parse this properly: {}",
-                        uuid,
-                        new String(record.getRecord(), StandardCharsets.UTF_8)
-                );
-                throw new RuntimeException(
-                    String.format(
-                        "[%s] Didn't find expected values for event from pod <%s> on container <%s> in file %s/%s at offset %s",
-                        uuid,
-                        namespace,
-                        podname,
-                        containerId,
-                        record.getPath(),
-                        record.getStartOffset()
-                    )
-                );
-            }
+            KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(Arrays.toString(record.getRecord()));
             Instant instant;
             try {
-                instant = Instant.parse(log.getTimestamp());
+                instant = Instant.parse(log.timestamp());
             }
             catch(DateTimeParseException e) {
                 throw new RuntimeException(
                         String.format(
                                 "[%s] Can't parse timestamp <%s> properly for event from pod <[%s]> on container <%s> in file %s/%s at offset %s: ",
                                 uuid,
-                                log.getTimestamp(),
+                                log.timestamp(),
                                 namespace,
                                 podname,
                                 containerId,
@@ -167,20 +123,6 @@ public class K8SConsumer implements Consumer<FileRecord> {
                                 record.getStartOffset()
                         ),
                         e
-                );
-            }
-            if(instant == null) {
-                throw new RuntimeException(
-                        String.format(
-                                "[%s] Unknown failure while parsing timestamp <%s> for event from pod <[%s]> on container <%s> in file %s/%s at offset %s",
-                                uuid,
-                                log.getTimestamp(),
-                                namespace,
-                                podname,
-                                containerId,
-                                record.getPath(),
-                                record.getStartOffset()
-                        )
                 );
             }
             ZonedDateTime zdt = instant.atZone(timezoneId);
@@ -235,11 +177,11 @@ public class K8SConsumer implements Consumer<FileRecord> {
             }
             else {
                 hostname = podMetadataContainer.getLabels().getOrDefault(
-                        appConfig.getKubernetes().getLabels().getHostname().getLabel(log.getStream()),
+                        appConfig.getKubernetes().getLabels().getHostname().getLabel(log.stream()),
                         appConfig.getKubernetes().getLabels().getHostname().getFallback()
                 );
                 appName = podMetadataContainer.getLabels().getOrDefault(
-                        appConfig.getKubernetes().getLabels().getAppName().getLabel(log.getStream()),
+                        appConfig.getKubernetes().getLabels().getAppName().getLabel(log.stream()),
                         appConfig.getKubernetes().getLabels().getAppName().getFallback()
                 );
             }
@@ -314,7 +256,7 @@ public class K8SConsumer implements Consumer<FileRecord> {
             final SDElement sdMetadata = new SDElement("kubernetesmeta@48577");
             sdMetadata.addSDParam("kubernetes", kubernetesMetadata.toString());
             sdMetadata.addSDParam("docker", dockerMetadata.toString());
-            sdMetadata.addSDParam("stream", log.getStream());
+            sdMetadata.addSDParam("stream", log.stream());
 
             final SDElement sdEventNodeSource = new SDElement("event_node_source@48577");
             sdEventNodeSource.addSDParam(sdRealHostname);
@@ -348,7 +290,7 @@ public class K8SConsumer implements Consumer<FileRecord> {
                     .withSDElement(sdEventNodeSource)
                     .withSDElement(sdEventId)
                     .withSDElement(sdMetadata)
-                    .withMsg(log.getLog());
+                    .withMsg(log.log());
             try {
                 RelpOutput output = relpOutputPool.take();
                 output.send(syslog);

@@ -16,27 +16,26 @@
 */
 
 package com.teragrep.k8s_01;
-import com.google.gson.Gson;
 
 public class KubernetesLogFilePOJO {
-    private String log;
-    private String stream;
-    private String time;
-
-    public String getLog() {
-        return log;
+    private final String record;
+    public KubernetesLogFilePOJO(String record) {
+        this.record = record;
     }
 
-    public String getStream() {
-        return stream;
+    // <timestamp> <stream> <F/P> <message>.
+    public String timestamp() {
+        return record.split(" ", 4)[0];
+    }
+    public String stream() {
+        return record.split(" ", 4)[1];
     }
 
-    public String getTimestamp() {
-        return time;
+    public boolean partial() {
+        return record.split(" ", 4)[2].equalsIgnoreCase("P");
     }
 
-    @Override
-    public String toString() {
-        return new Gson().toJson(this);
+    public String log() {
+        return record.split(" ", 4)[3];
     }
 }

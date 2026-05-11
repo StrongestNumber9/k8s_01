@@ -1,0 +1,58 @@
+/*
+   Kubernetes log forwarder k8s_01
+   Copyright (C) 2023  Suomen Kanuuna Oy
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+package com.teragrep.k8s_01;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+public class KubernetesLogFilePOJOTest {
+    @Test
+    public void testTimestampFormat() {
+        String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Timestamp Test";
+        KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
+        Assertions.assertEquals("2026-05-08T13:18:22.542002411+03:00", log.timestamp());
+    }
+
+    @Test
+    public void testStream() {
+        String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Stream Test";
+        KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
+        Assertions.assertEquals("stdout", log.stream());
+    }
+
+    @Test
+    public void testPartialFalse() {
+        String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Partial Test / False";
+        KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
+        Assertions.assertFalse(log.partial());
+    }
+
+    @Test
+    public void testPartialTrue() {
+        String record = "2026-05-08T13:18:22.542002411+03:00 stdout P Partial Test / True";
+        KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
+        Assertions.assertTrue(log.partial());
+
+    }
+
+    @Test
+    public void testLog() {
+        String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Log Test";
+        KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
+        Assertions.assertEquals("Log Test", log.log());
+    }
+}
