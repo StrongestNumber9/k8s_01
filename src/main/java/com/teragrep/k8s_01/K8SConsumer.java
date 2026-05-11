@@ -105,7 +105,7 @@ public class K8SConsumer implements Consumer<FileRecord> {
             String namespace = ContainerInfo.getNamespace(record.getFilename());
             String podname = ContainerInfo.getPodname(record.getFilename());
             String containerId = ContainerInfo.getContainerID(record.getFilename());
-            KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(Arrays.toString(record.getRecord()));
+            KubernetesLogFilePOJO log = new KubernetesLogFilePOJO(new String(record.getRecord(), StandardCharsets.UTF_8));
             Instant instant;
             try {
                 instant = Instant.parse(log.timestamp());
