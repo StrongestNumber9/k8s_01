@@ -1,7 +1,7 @@
 image:
   # Image will be downloaded from {repository}/{path}:{Tag from Chart.Version}
   repository: ghcr.io
-  path: StrongestNumber9/k8s_01
+  path: strongestnumber9/k8s_01
   pullPolicy: IfNotPresent
 
 config:
