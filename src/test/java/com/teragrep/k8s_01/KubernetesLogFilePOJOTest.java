@@ -19,12 +19,22 @@ package com.teragrep.k8s_01;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+
 public class KubernetesLogFilePOJOTest {
     @Test
     public void testTimestampFormat() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Timestamp Test";
         KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
         Assertions.assertEquals("2026-05-08T13:18:22.542002411+03:00", log.timestamp());
+    }
+
+    @Test
+    public void testTimestampParsesToInstant() {
+        String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Timestamp Test";
+        KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
+        Instant timestamp = Instant.parse(log.timestamp());
+        Assertions.assertEquals("2026-05-08T10:18:22.542002411Z", timestamp.toString());
     }
 
     @Test
