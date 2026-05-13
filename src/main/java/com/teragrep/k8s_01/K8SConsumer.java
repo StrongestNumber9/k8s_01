@@ -36,6 +36,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -61,6 +62,8 @@ public class K8SConsumer implements Consumer<FileRecord> {
     private final SDParam sdRealHostname;
     private final SDParam sdSourceModule = new SDParam("source_module", "k8s_01");
     private final SDParam sdIdSource = new SDParam("id_source", "source");
+    private static final KubernetesLogFilePOJO emptyRecord = new KubernetesLogFilePOJO("");
+    AtomicReference<KubernetesLogFilePOJO> lastRecord = new AtomicReference<>(emptyRecord);
     K8SConsumer(
             AppConfig appConfig,
             KubernetesCachingAPIClient cacheClient,
@@ -84,6 +87,15 @@ public class K8SConsumer implements Consumer<FileRecord> {
     }
     @Override
     public void accept(FileRecord record) {
+            KubernetesLogFilePOJO log = new KubernetesLogFilePOJO(new String(record.getRecord(), StandardCharsets.UTF_8));
+            if (lastRecord.get() == emptyRecord && log.partial) {
+                lastRecord.set(log);
+                return;
+            }
+            if(log.partial) {
+                lastRecord.set(lastRecord.get().append(log.log));
+                return;
+            }
 
             UUID uuid = java.util.UUID.randomUUID();
             if(LOGGER.isDebugEnabled()) {
@@ -104,17 +116,16 @@ public class K8SConsumer implements Consumer<FileRecord> {
             String namespace = ContainerInfo.getNamespace(record.getFilename());
             String podname = ContainerInfo.getPodname(record.getFilename());
             String containerId = ContainerInfo.getContainerID(record.getFilename());
-            KubernetesLogFilePOJO log = new KubernetesLogFilePOJO(new String(record.getRecord(), StandardCharsets.UTF_8));
             Instant instant;
             try {
-                instant = Instant.parse(log.timestamp());
+                instant = Instant.parse(log.timestamp);
             }
             catch(DateTimeParseException e) {
                 throw new RuntimeException(
                         String.format(
                                 "[%s] Can't parse timestamp <%s> properly for event from pod <[%s]> on container <%s> in file %s/%s at offset %s: ",
                                 uuid,
-                                log.timestamp(),
+                                log.timestamp,
                                 namespace,
                                 podname,
                                 containerId,
@@ -176,11 +187,11 @@ public class K8SConsumer implements Consumer<FileRecord> {
             }
             else {
                 hostname = podMetadataContainer.getLabels().getOrDefault(
-                        appConfig.getKubernetes().getLabels().getHostname().getLabel(log.stream()),
+                        appConfig.getKubernetes().getLabels().getHostname().getLabel(log.stream),
                         appConfig.getKubernetes().getLabels().getHostname().getFallback()
                 );
                 appName = podMetadataContainer.getLabels().getOrDefault(
-                        appConfig.getKubernetes().getLabels().getAppName().getLabel(log.stream()),
+                        appConfig.getKubernetes().getLabels().getAppName().getLabel(log.stream),
                         appConfig.getKubernetes().getLabels().getAppName().getFallback()
                 );
             }
@@ -255,7 +266,7 @@ public class K8SConsumer implements Consumer<FileRecord> {
             final SDElement sdMetadata = new SDElement("kubernetesmeta@48577");
             sdMetadata.addSDParam("kubernetes", kubernetesMetadata.toString());
             sdMetadata.addSDParam("docker", dockerMetadata.toString());
-            sdMetadata.addSDParam("stream", log.stream());
+            sdMetadata.addSDParam("stream", log.stream);
 
             final SDElement sdEventNodeSource = new SDElement("event_node_source@48577");
             sdEventNodeSource.addSDParam(sdRealHostname);
@@ -289,7 +300,7 @@ public class K8SConsumer implements Consumer<FileRecord> {
                     .withSDElement(sdEventNodeSource)
                     .withSDElement(sdEventId)
                     .withSDElement(sdMetadata)
-                    .withMsg(log.log());
+                    .withMsg(log.log);
             try {
                 RelpOutput output = relpOutputPool.take();
                 output.send(syslog);
@@ -297,5 +308,6 @@ public class K8SConsumer implements Consumer<FileRecord> {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+            lastRecord.set(emptyRecord);
     }
 }

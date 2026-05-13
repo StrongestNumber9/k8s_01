@@ -26,14 +26,14 @@ public class KubernetesLogFilePOJOTest {
     public void testTimestampFormat() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Timestamp Test";
         KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
-        Assertions.assertEquals("2026-05-08T13:18:22.542002411+03:00", log.timestamp());
+        Assertions.assertEquals("2026-05-08T13:18:22.542002411+03:00", log.timestamp);
     }
 
     @Test
     public void testTimestampParsesToInstant() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Timestamp Test";
         KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
-        Instant timestamp = Instant.parse(log.timestamp());
+        Instant timestamp = Instant.parse(log.timestamp);
         Assertions.assertEquals("2026-05-08T10:18:22.542002411Z", timestamp.toString());
     }
 
@@ -41,21 +41,21 @@ public class KubernetesLogFilePOJOTest {
     public void testStream() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Stream Test";
         KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
-        Assertions.assertEquals("stdout", log.stream());
+        Assertions.assertEquals("stdout", log.stream);
     }
 
     @Test
     public void testPartialFalse() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Partial Test / False";
         KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
-        Assertions.assertFalse(log.partial());
+        Assertions.assertFalse(log.partial);
     }
 
     @Test
     public void testPartialTrue() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout P Partial Test / True";
         KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
-        Assertions.assertTrue(log.partial());
+        Assertions.assertTrue(log.partial);
 
     }
 
@@ -63,6 +63,6 @@ public class KubernetesLogFilePOJOTest {
     public void testLog() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Log Test";
         KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
-        Assertions.assertEquals("Log Test", log.log());
+        Assertions.assertEquals("Log Test", log.log);
     }
 }

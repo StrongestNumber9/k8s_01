@@ -17,25 +17,39 @@
 
 package com.teragrep.k8s_01;
 
+import java.util.Objects;
+
 public class KubernetesLogFilePOJO {
-    private final String record;
+    public final String timestamp;
+    public final String stream;
+    public final boolean partial;
+    public final String log;
+
     public KubernetesLogFilePOJO(String record) {
-        this.record = record;
+        String[] split =  record.split(" ", 4);
+        this(split[0], split[1], split[2].equalsIgnoreCase("P"), split[3]);
     }
 
-    // <timestamp> <stream> <F/P> <message>.
-    public String timestamp() {
-        return record.split(" ", 4)[0];
-    }
-    public String stream() {
-        return record.split(" ", 4)[1];
-    }
-
-    public boolean partial() {
-        return record.split(" ", 4)[2].equalsIgnoreCase("P");
+    public KubernetesLogFilePOJO(String timestamp, String stream, boolean partial, String log) {
+        this.timestamp = timestamp;
+        this.stream = stream;
+        this.partial = partial;
+        this.log = log;
     }
 
-    public String log() {
-        return record.split(" ", 4)[3];
+    public KubernetesLogFilePOJO append(String record) {
+        return new KubernetesLogFilePOJO(timestamp, stream, partial, log + record);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        KubernetesLogFilePOJO that = (KubernetesLogFilePOJO) o;
+        return partial == that.partial && Objects.equals(timestamp, that.timestamp) && Objects.equals(stream, that.stream) && Objects.equals(log, that.log);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(timestamp, stream, partial, log);
     }
 }
