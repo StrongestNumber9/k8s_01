@@ -25,14 +25,14 @@ public class KubernetesLogFilePOJOTest {
     @Test
     public void testTimestampFormat() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Timestamp Test";
-        KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
+        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record);
         Assertions.assertEquals("2026-05-08T13:18:22.542002411+03:00", log.timestamp());
     }
 
     @Test
     public void testTimestampParsesToInstant() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Timestamp Test";
-        KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
+        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record);
         Instant timestamp = Instant.parse(log.timestamp());
         Assertions.assertEquals("2026-05-08T10:18:22.542002411Z", timestamp.toString());
     }
@@ -40,21 +40,21 @@ public class KubernetesLogFilePOJOTest {
     @Test
     public void testStream() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Stream Test";
-        KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
+        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record);
         Assertions.assertEquals("stdout", log.stream());
     }
 
     @Test
     public void testPartialFalse() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Partial Test / False";
-        KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
+        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record);
         Assertions.assertFalse(log.partial());
     }
 
     @Test
     public void testPartialTrue() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout P Partial Test / True";
-        KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
+        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record);
         Assertions.assertTrue(log.partial());
 
     }
@@ -62,7 +62,14 @@ public class KubernetesLogFilePOJOTest {
     @Test
     public void testLog() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Log Test";
-        KubernetesLogFilePOJO log = new  KubernetesLogFilePOJO(record);
+        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record);
         Assertions.assertEquals("Log Test", log.log());
+    }
+
+    @Test
+    public void testStub() {
+        String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Log Test";
+        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record);
+        Assertions.assertFalse(log.stub());
     }
 }

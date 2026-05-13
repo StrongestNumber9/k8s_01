@@ -36,6 +36,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -61,6 +62,8 @@ public class K8SConsumer implements Consumer<FileRecord> {
     private final SDParam sdRealHostname;
     private final SDParam sdSourceModule = new SDParam("source_module", "k8s_01");
     private final SDParam sdIdSource = new SDParam("id_source", "source");
+    private static final KubernetesLogFilePOJO emptyRecord = new KubernetesLogFilePOJOStub();
+    AtomicReference<KubernetesLogFilePOJO> lastRecord = new AtomicReference<>(emptyRecord);
     K8SConsumer(
             AppConfig appConfig,
             KubernetesCachingAPIClient cacheClient,
@@ -84,6 +87,15 @@ public class K8SConsumer implements Consumer<FileRecord> {
     }
     @Override
     public void accept(FileRecord record) {
+            KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(new String(record.getRecord(), StandardCharsets.UTF_8));
+            if (lastRecord.get().stub() && log.partial()) {
+                lastRecord.set(log);
+                return;
+            }
+            if(log.partial()) {
+                lastRecord.set(lastRecord.get().append(log.log()));
+                return;
+            }
 
             UUID uuid = java.util.UUID.randomUUID();
             if(LOGGER.isDebugEnabled()) {
@@ -104,7 +116,6 @@ public class K8SConsumer implements Consumer<FileRecord> {
             String namespace = ContainerInfo.getNamespace(record.getFilename());
             String podname = ContainerInfo.getPodname(record.getFilename());
             String containerId = ContainerInfo.getContainerID(record.getFilename());
-            KubernetesLogFilePOJO log = new KubernetesLogFilePOJO(new String(record.getRecord(), StandardCharsets.UTF_8));
             Instant instant;
             try {
                 instant = Instant.parse(log.timestamp());
@@ -297,5 +308,6 @@ public class K8SConsumer implements Consumer<FileRecord> {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+            lastRecord.set(emptyRecord);
     }
 }

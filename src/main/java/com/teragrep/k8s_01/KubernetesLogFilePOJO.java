@@ -16,26 +16,11 @@
 */
 
 package com.teragrep.k8s_01;
-
-public class KubernetesLogFilePOJO {
-    private final String record;
-    public KubernetesLogFilePOJO(String record) {
-        this.record = record;
-    }
-
-    // <timestamp> <stream> <F/P> <message>.
-    public String timestamp() {
-        return record.split(" ", 4)[0];
-    }
-    public String stream() {
-        return record.split(" ", 4)[1];
-    }
-
-    public boolean partial() {
-        return record.split(" ", 4)[2].equalsIgnoreCase("P");
-    }
-
-    public String log() {
-        return record.split(" ", 4)[3];
-    }
+public interface KubernetesLogFilePOJO {
+    KubernetesLogFilePOJOImpl append(String record);
+    boolean stub();
+    String timestamp();
+    String stream();
+    boolean partial();
+    String log();
 }
