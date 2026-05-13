@@ -88,21 +88,25 @@ public class K8SConsumer implements Consumer<FileRecord> {
     @Override
     public void accept(FileRecord record) {
             KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(new String(record.getRecord(), StandardCharsets.UTF_8));
-            LOGGER.debug("Got log: <{}>", log);
+            LOGGER.info("Got log: <{}>", log);
             if (lastRecord.get().stub() && log.partial()) {
-                LOGGER.debug("Stub and partial, setting log to <{}>", log);
-                LOGGER.debug("Current lastRecord: <{}>", lastRecord.get());
+                LOGGER.info("Stub and partial, setting log to <{}>", log);
+                LOGGER.info("Current lastRecord: <{}>", lastRecord.get());
                 lastRecord.set(log);
                 return;
             }
             if(log.partial()) {
-                LOGGER.debug("Not stub but partial, setting log to <{}>", log);
-                LOGGER.debug("Current lastRecord: <{}>", lastRecord.get());
+                LOGGER.info("Not stub but partial, setting log to <{}>", log);
+                LOGGER.info("Current lastRecord: <{}>", lastRecord.get());
                 lastRecord.set(lastRecord.get().append(log.log()));
-                LOGGER.debug("New lastRecord after append: <{}>", lastRecord.get());
+                LOGGER.info("New lastRecord after append: <{}>", lastRecord.get());
                 return;
             }
-            LOGGER.debug("Sending stuff!");
+            if(!lastRecord.get().stub()) {
+                LOGGER.info("Last message was not a stub so this is last message for a full event!");
+                log = lastRecord.get().append(log.log());
+            }
+            LOGGER.debug("Sending stuff: <{}>", log);
 
             UUID uuid = java.util.UUID.randomUUID();
             if(LOGGER.isDebugEnabled()) {
