@@ -27,7 +27,7 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
 
     public KubernetesLogFilePOJOImpl(String record) {
         String[] split =  record.split(" ", 4);
-        this(split[0], split[1], split[2].equalsIgnoreCase("P"), split[3]);
+        this(split[0], split[1], split[2].equalsIgnoreCase("P"), split[3].trim());
     }
 
     public KubernetesLogFilePOJOImpl(String timestamp, String stream, boolean partial, String log) {
@@ -72,5 +72,15 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     @Override
     public int hashCode() {
         return Objects.hash(timestamp, stream, partial, log);
+    }
+
+    @Override
+    public String toString() {
+        return "KubernetesLogFilePOJOImpl{" +
+                "timestamp='" + timestamp + '\'' +
+                ", stream='" + stream + '\'' +
+                ", partial=" + partial +
+                ", log='" + log + '\'' +
+                '}';
     }
 }

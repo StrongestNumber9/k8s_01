@@ -89,12 +89,18 @@ public class K8SConsumer implements Consumer<FileRecord> {
     public void accept(FileRecord record) {
             KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(new String(record.getRecord(), StandardCharsets.UTF_8));
             if (lastRecord.get().stub() && log.partial()) {
+                LOGGER.debug("Starting a new partial record");
                 lastRecord.set(log);
                 return;
             }
             if(log.partial()) {
+                LOGGER.debug("Appending to existing partial record");
                 lastRecord.set(lastRecord.get().append(log.log()));
                 return;
+            }
+            if(!lastRecord.get().stub()) {
+                LOGGER.debug("Finishing a partial record");
+                log = lastRecord.get().append(log.log());
             }
 
             UUID uuid = java.util.UUID.randomUUID();
