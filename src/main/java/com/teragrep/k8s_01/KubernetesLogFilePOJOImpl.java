@@ -73,4 +73,14 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     public int hashCode() {
         return Objects.hash(timestamp, stream, partial, log);
     }
+
+    @Override
+    public String toString() {
+        return "KubernetesLogFilePOJOImpl{" +
+                "timestamp='" + timestamp + '\'' +
+                ", stream='" + stream + '\'' +
+                ", partial=" + partial +
+                ", log='" + log + '\'' +
+                '}';
+    }
 }

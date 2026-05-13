@@ -43,4 +43,9 @@ public class KubernetesLogFilePOJOStub implements KubernetesLogFilePOJO {
     public String log() {
         throw new UnsupportedOperationException("Stub does not support log");
     }
+
+    @Override
+    public String toString() {
+        return "KubernetesLogFilePOJOStub{}";
+    }
 }
