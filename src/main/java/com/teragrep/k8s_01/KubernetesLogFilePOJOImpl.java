@@ -17,70 +17,77 @@
 
 package com.teragrep.k8s_01;
 
-import java.util.Objects;
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
-    private final String timestamp;
-    private final String stream;
-    private final boolean partial;
-    private final StringBuilder log;
+    private final Fragment timestamp;
+    private final Fragment stream;
+    private final Fragment partial;
+    private final Fragment log;
+    private final List<Fragment> logs;
 
-    public KubernetesLogFilePOJOImpl(String record) {
-        String[] split =  record.split(" ", 4);
-        this(split[0], split[1], split[2].equalsIgnoreCase("P"), new StringBuilder(split[3].trim()));
+    public KubernetesLogFilePOJOImpl(byte[] record) {
+        this.timestamp = new Fragment(64, new SpaceDelimiterFunction());
+        this.stream = new Fragment(64, new SpaceDelimiterFunction());
+        this.partial = new Fragment(64, new SpaceDelimiterFunction());
+        this.log = new Fragment(256*1024, new LogReaderFunction());
+        this.logs = new ArrayList<>();
+        ByteStream byteStream = new ByteStream(new ByteArrayInputStream(record));
+        Consumer<ByteStream> streamConsumer = timestamp.andThen(
+                stream.andThen(
+                        partial.andThen(
+                                log
+                        )
+                )
+        );
+        this.logs.add(log);
+        byteStream.next();
+        streamConsumer.accept(byteStream);
     }
 
-    public KubernetesLogFilePOJOImpl(String timestamp, String stream, boolean partial, StringBuilder log) {
+    public KubernetesLogFilePOJOImpl(Fragment timestamp, Fragment stream, Fragment partial, Fragment log, List<Fragment> logs) {
         this.timestamp = timestamp;
         this.stream = stream;
         this.partial = partial;
         this.log = log;
+        this.logs = logs;
+        logs.add(log);
     }
 
-    public KubernetesLogFilePOJOImpl append(String event) {
-        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, new StringBuilder(log).append(event));
+
+    public KubernetesLogFilePOJO append(Fragment log) {
+        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, log, logs);
     }
 
     public String timestamp() {
-        return timestamp;
+        return timestamp.toString();
     }
 
     public String stream() {
-        return stream;
+        return stream.toString();
     }
 
     public boolean partial() {
-        return partial;
+        return partial.toString().equalsIgnoreCase("P");
     }
 
-    public String log() {
-        return log.toString();
+    public Fragment payloadFragment() {
+        return log;
+    }
+
+    public String payload() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for(Fragment fragment : logs) {
+            stringBuilder.append(fragment.toString());
+        }
+        return stringBuilder.toString();
     }
 
     @Override
     public boolean stub() {
         return false;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        KubernetesLogFilePOJOImpl that = (KubernetesLogFilePOJOImpl) o;
-        return partial == that.partial && Objects.equals(timestamp, that.timestamp) && Objects.equals(stream, that.stream) && Objects.equals(log.toString(), that.log.toString());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(timestamp, stream, partial, log);
-    }
-
-    @Override
-    public String toString() {
-        return "KubernetesLogFilePOJOImpl{" +
-                "timestamp='" + timestamp + '\'' +
-                ", stream='" + stream + '\'' +
-                ", partial=" + partial +
-                ", log=" + log +
-                '}';
     }
 }

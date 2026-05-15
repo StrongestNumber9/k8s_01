@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -87,7 +86,7 @@ public class K8SConsumer implements Consumer<FileRecord> {
     }
     @Override
     public void accept(FileRecord record) {
-            KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(new String(record.getRecord(), StandardCharsets.UTF_8));
+            KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record.getRecord());
             if (lastRecord.get().stub() && log.partial()) {
                 LOGGER.debug("Starting a new partial record");
                 lastRecord.set(log);
@@ -95,12 +94,12 @@ public class K8SConsumer implements Consumer<FileRecord> {
             }
             if(log.partial()) {
                 LOGGER.debug("Appending to existing partial record");
-                lastRecord.set(lastRecord.get().append(log.log()));
+                lastRecord.set(lastRecord.get().append(log.payloadFragment()));
                 return;
             }
             if(!lastRecord.get().stub()) {
                 LOGGER.debug("Finishing a partial record");
-                log = lastRecord.get().append(log.log());
+                log = lastRecord.get().append(log.payloadFragment());
             }
 
             UUID uuid = java.util.UUID.randomUUID();
@@ -306,7 +305,7 @@ public class K8SConsumer implements Consumer<FileRecord> {
                     .withSDElement(sdEventNodeSource)
                     .withSDElement(sdEventId)
                     .withSDElement(sdMetadata)
-                    .withMsg(log.log());
+                    .withMsg(log.payload());
             try {
                 RelpOutput output = relpOutputPool.take();
                 output.send(syslog);

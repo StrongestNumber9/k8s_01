@@ -19,20 +19,21 @@ package com.teragrep.k8s_01;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 public class KubernetesLogFilePOJOTest {
     @Test
     public void testTimestampFormat() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Timestamp Test";
-        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record);
+        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record.getBytes(StandardCharsets.UTF_8));
         Assertions.assertEquals("2026-05-08T13:18:22.542002411+03:00", log.timestamp());
     }
 
     @Test
     public void testTimestampParsesToInstant() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Timestamp Test";
-        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record);
+        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record.getBytes(StandardCharsets.UTF_8));
         Instant timestamp = Instant.parse(log.timestamp());
         Assertions.assertEquals("2026-05-08T10:18:22.542002411Z", timestamp.toString());
     }
@@ -40,36 +41,46 @@ public class KubernetesLogFilePOJOTest {
     @Test
     public void testStream() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Stream Test";
-        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record);
+        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record.getBytes(StandardCharsets.UTF_8));
         Assertions.assertEquals("stdout", log.stream());
     }
 
     @Test
     public void testPartialFalse() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Partial Test / False";
-        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record);
+        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record.getBytes(StandardCharsets.UTF_8));
         Assertions.assertFalse(log.partial());
     }
 
     @Test
     public void testPartialTrue() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout P Partial Test / True";
-        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record);
+        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record.getBytes(StandardCharsets.UTF_8));
         Assertions.assertTrue(log.partial());
 
     }
 
     @Test
-    public void testLog() {
+    public void testPayloadFragment() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Log Test";
-        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record);
-        Assertions.assertEquals("Log Test", log.log());
+        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record.getBytes(StandardCharsets.UTF_8));
+        Assertions.assertEquals("Log Test", log.payload());
     }
 
     @Test
     public void testStub() {
-        String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Log Test";
-        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record);
+        String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Stub Test";
+        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record.getBytes(StandardCharsets.UTF_8));
         Assertions.assertFalse(log.stub());
+    }
+
+    @Test
+    public void testAppend() {
+        String record_start = "2026-05-08T11:11:11.123456+03:00 stdout P Start message";
+        String record_end = "2026-05-08T12:12:12.123456+03:00 stdout F , end here";
+        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record_start.getBytes(StandardCharsets.UTF_8));
+        KubernetesLogFilePOJO append = new KubernetesLogFilePOJOImpl(record_end.getBytes(StandardCharsets.UTF_8));
+        KubernetesLogFilePOJO combined = log.append(append.payloadFragment());
+        Assertions.assertEquals("Start message, end here", combined.payload());
     }
 }

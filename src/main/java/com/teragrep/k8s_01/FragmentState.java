@@ -17,12 +17,6 @@
 
 package com.teragrep.k8s_01;
 
-public interface KubernetesLogFilePOJO {
-    boolean stub();
-    String timestamp();
-    String stream();
-    boolean partial();
-    String payload();
-    Fragment payloadFragment();
-    KubernetesLogFilePOJO append(Fragment log);
+public enum FragmentState {
+    WRITTEN, EMPTY
 }
