@@ -30,15 +30,15 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
         this(split[0], split[1], split[2].equalsIgnoreCase("P"), new StringBuilder().append(split[3].trim()));
     }
 
-    public KubernetesLogFilePOJOImpl(String timestamp, String stream, boolean partial, StringBuilder log) {
+    public KubernetesLogFilePOJOImpl(String timestamp, String stream, boolean partial, StringBuilder event) {
         this.timestamp = timestamp;
         this.stream = stream;
         this.partial = partial;
-        this.log.append(log);
+        this.log.append(event);
     }
 
-    public KubernetesLogFilePOJOImpl append(String record) {
-        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, log.append(record));
+    public KubernetesLogFilePOJOImpl append(String event) {
+        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, log.append(event));
     }
 
     public String timestamp() {
@@ -66,7 +66,7 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         KubernetesLogFilePOJOImpl that = (KubernetesLogFilePOJOImpl) o;
-        return partial == that.partial && Objects.equals(timestamp, that.timestamp) && Objects.equals(stream, that.stream) && Objects.equals(log, that.log);
+        return partial == that.partial && Objects.equals(timestamp, that.timestamp) && Objects.equals(stream, that.stream) && Objects.equals(log.toString(), that.log.toString());
     }
 
     @Override
@@ -80,7 +80,7 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
                 "timestamp='" + timestamp + '\'' +
                 ", stream='" + stream + '\'' +
                 ", partial=" + partial +
-                ", log='" + log + '\'' +
+                ", log=" + log +
                 '}';
     }
 }
