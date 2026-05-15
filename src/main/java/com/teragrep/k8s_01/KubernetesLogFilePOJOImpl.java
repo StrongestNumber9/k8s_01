@@ -23,22 +23,22 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     private final String timestamp;
     private final String stream;
     private final boolean partial;
-    private final String log;
+    private final StringBuilder log = new StringBuilder();
 
     public KubernetesLogFilePOJOImpl(String record) {
         String[] split =  record.split(" ", 4);
-        this(split[0], split[1], split[2].equalsIgnoreCase("P"), split[3].trim());
+        this(split[0], split[1], split[2].equalsIgnoreCase("P"), new StringBuilder().append(split[3].trim()));
     }
 
-    public KubernetesLogFilePOJOImpl(String timestamp, String stream, boolean partial, String log) {
+    public KubernetesLogFilePOJOImpl(String timestamp, String stream, boolean partial, StringBuilder log) {
         this.timestamp = timestamp;
         this.stream = stream;
         this.partial = partial;
-        this.log = log;
+        this.log.append(log);
     }
 
     public KubernetesLogFilePOJOImpl append(String record) {
-        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, log + record);
+        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, log.append(record));
     }
 
     public String timestamp() {
@@ -54,7 +54,7 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     }
 
     public String log() {
-        return log;
+        return log.toString();
     }
 
     @Override
