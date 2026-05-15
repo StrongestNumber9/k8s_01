@@ -38,7 +38,7 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     }
 
     public KubernetesLogFilePOJOImpl append(String event) {
-        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, log.append(event));
+        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, new StringBuilder(log).append(event));
     }
 
     public String timestamp() {
