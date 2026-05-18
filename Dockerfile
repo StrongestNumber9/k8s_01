@@ -3,7 +3,7 @@ RUN --mount=type=bind,source=./artifacts/,target=/artifacts/,z dnf install -y /a
 
 FROM localhost/microjre-builder:latest as optimize
 COPY --from=source /opt/teragrep /opt/teragrep
-RUN /optimize.sh 25 opt/teragrep/k8s_01/lib/k8s_01.jar k8s_01;
+RUN /optimize.sh 25 /opt/teragrep/k8s_01/lib/k8s_01.jar /opt/teragrep/k8s_01;
 
 FROM rockylinux/rockylinux:9-ubi-micro
 COPY --from=optimize /opt/teragrep /opt/teragrep
