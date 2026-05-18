@@ -3,3 +3,4 @@ rpm/target/**
 .idea/**
 dependency-reduced-pom.xml
 example/combined.yaml
+/artifacts/**

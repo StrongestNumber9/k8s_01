@@ -17,12 +17,9 @@
 
 package com.teragrep.k8s_01;
 
-public interface KubernetesLogFilePOJO {
-    boolean stub();
-    String timestamp();
-    String stream();
-    boolean partial();
-    String payload();
-    Fragment payloadFragment();
-    KubernetesLogFilePOJO append(Fragment log);
+import java.nio.ByteBuffer;
+
+public interface Matchable {
+
+    public abstract boolean matches(ByteBuffer buffer);
 }
