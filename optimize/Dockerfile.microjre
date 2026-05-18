@@ -1,0 +1,4 @@
+FROM rockylinux/rockylinux:9
+ARG JAVA_VERSION
+ARG JAR_PATH
+COPY optimize.sh /optimize.sh
