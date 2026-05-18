@@ -230,6 +230,7 @@
             <exclude>rpm/log4j2.xml</exclude>
             <!-- docker -->
             <exclude>Dockerfile</exclude>
+            <exclude>optimize/**</exclude>
             <!-- example -->
             <exclude>example/**</exclude>
             <!-- helm files -->
