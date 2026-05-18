@@ -41,7 +41,7 @@ jobs:
       - name: Build images
         run: |
           set -e;
-          ( cd optimize/ && podman build --tag -f Dockerfile.microjre -t microjre-builder:latest . );
+          ( cd optimize/ && podman build --tag localhost/microjre-builder:latest -f Dockerfile.microjre -t microjre-builder:latest . );
           podman build --tag "ghcr.io/${{ env.REPO_LC }}:${{ github.event.workflow_run.head_branch }}" --tag "ghcr.io/${{ env.REPO_LC }}:latest" .
           for tag in "${{ github.event.workflow_run.head_branch }}" latest; do
             podman push "ghcr.io/${{ env.REPO_LC }}:${tag}" &
