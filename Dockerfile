@@ -5,7 +5,7 @@ RUN /usr/lib/jvm/java-25-openjdk/bin/jdeps --multi-release=25 -quiet --print-mod
 RUN /usr/bin/xargs -a jre_modules.out /usr/lib/jvm/java-25-openjdk/bin/jlink --compress=zip-9 --no-header-files --no-man-pages --strip-debug "--output=/tmp/microjre/" --add-modules;
 RUN cp -arv /tmp/microjre/* /opt/teragrep/k8s_01/;
 
-FROM scratch
+FROM rockylinux/rockylinux:9-ubi-micro
 COPY --from=builder /opt/teragrep /opt/teragrep
 VOLUME /opt/teragrep/k8s_01/var
 VOLUME /opt/teragrep/k8s_01/etc
