@@ -26,7 +26,7 @@ final class ByteStream implements Supplier<Byte> {
 
     private final InputStream inputStream;
 
-    private final byte[] buffer = new byte[256 * 1024];
+    private final byte[] buffer = new byte[128];
     private int pointer;
     private int bytesInBuffer;
     private byte b;

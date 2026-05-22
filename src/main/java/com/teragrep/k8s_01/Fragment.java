@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-public final class Fragment implements Consumer<ByteStream>, Clearable, Matchable {
+public final class Fragment implements Consumer<ByteStream>, Clearable, Matchable, Byteable {
 
     private final ByteBuffer buffer;
     private FragmentState fragmentState;
@@ -79,5 +79,16 @@ public final class Fragment implements Consumer<ByteStream>, Clearable, Matchabl
             throw new IllegalStateException("fragmentState != FragmentState.WRITTEN");
         }
         return buffer.equals(other);
+    }
+
+    @Override
+    public byte[] toBytes() {
+        if (fragmentState != FragmentState.WRITTEN) {
+            throw new IllegalStateException("fragmentState != FragmentState.WRITTEN");
+        }
+        final byte[] bytes = new byte[buffer.remaining()];
+        buffer.get(bytes);
+        buffer.rewind();
+        return bytes;
     }
 }

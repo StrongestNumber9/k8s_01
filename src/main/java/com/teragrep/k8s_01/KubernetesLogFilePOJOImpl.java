@@ -18,6 +18,8 @@
 package com.teragrep.k8s_01;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -31,9 +33,9 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
 
     public KubernetesLogFilePOJOImpl(byte[] record) {
         this.timestamp = new Fragment(64, new SpaceDelimiterFunction());
-        this.stream = new Fragment(64, new SpaceDelimiterFunction());
-        this.partial = new Fragment(64, new SpaceDelimiterFunction());
-        this.log = new Fragment(256*1024, new LogReaderFunction());
+        this.stream = new Fragment(10, new SpaceDelimiterFunction());
+        this.partial = new Fragment(1, new SpaceDelimiterFunction());
+        this.log = new Fragment(record.length, new LogReaderFunction());
         this.logs = new ArrayList<>();
         ByteStream byteStream = new ByteStream(new ByteArrayInputStream(record));
         Consumer<ByteStream> streamConsumer = timestamp.andThen(
@@ -79,11 +81,11 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     }
 
     public String payload() {
-        StringBuilder stringBuilder = new StringBuilder();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         for(Fragment fragment : logs) {
-            stringBuilder.append(fragment.toString());
+            byteArrayOutputStream.writeBytes(fragment.toBytes());
         }
-        return stringBuilder.toString();
+        return byteArrayOutputStream.toString(StandardCharsets.UTF_8);
     }
 
     @Override
