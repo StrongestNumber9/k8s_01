@@ -30,7 +30,7 @@ import java.time.Instant;
 public class KubernetesLogFilePOJOManualBenchmarkTest {
     @Test
     public void testParseSmall() {
-        float rounds = 1_000_000;
+        int rounds = 1_000_000;
         byte[] record = "2026-05-08T11:11:11.123456789+03:00 stdout F Start message".getBytes(StandardCharsets.UTF_8);
         Instant start = Instant.now();
         for(int i = 0; i < rounds; i++) {
@@ -44,7 +44,7 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
 
     @Test
     public void testParseBig() {
-        float rounds = 100_000;
+        int rounds = 100_000;
         String payload = "Start message" + "X".repeat(10*1024);
         byte[] record = ("2026-05-08T11:11:11.123456789+03:00 stdout F " + payload).getBytes(StandardCharsets.UTF_8);
         Instant start = Instant.now();
@@ -59,7 +59,7 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
 
     @Test
     public void testParseVeryBig() {
-        float rounds = 10_000;
+        int rounds = 10_000;
         String payload = "Start message" + "X".repeat(100*1024);
         byte[] record = ("2026-05-08T11:11:11.123456789+03:00 stdout F " + payload).getBytes(StandardCharsets.UTF_8);
         Instant start = Instant.now();
@@ -74,7 +74,7 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
 
     @Test
     public void testAppendSmall() {
-        float rounds = 1_000_000;
+        int rounds = 1_000_000;
         byte[] first = "2026-05-08T11:11:11.123456789+03:00 stdout P Start message".getBytes(StandardCharsets.UTF_8);
         byte[] second = "2026-05-08T12:12:12.987654321+03:00 stdout F , end here".getBytes(StandardCharsets.UTF_8);
         Instant start = Instant.now();
@@ -91,7 +91,7 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
 
     @Test
     public void testAppendBig() {
-        float rounds = 100_000;
+        int rounds = 100_000;
         String payload = "X".repeat(10*1024);
         byte[] first = ("2026-05-08T11:11:11.123456789+03:00 stdout P "+payload).getBytes(StandardCharsets.UTF_8);
         byte[] second = ("2026-05-08T12:12:12.987654321+03:00 stdout F "+payload).getBytes(StandardCharsets.UTF_8);
@@ -107,9 +107,9 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
         printStats("append big", rounds, duration, first.length + second.length);
     }
 
-    private void printStats(String name, float rounds, float duration, int recordSize) {
+    private void printStats(String name, int rounds, float duration, int recordSize) {
         DecimalFormat df = new DecimalFormat("#.##");
-        float totalSizeMB = (recordSize * rounds)/1024/1024;
-        System.out.println("Ran <"+name+"> for <"+rounds+"> rounds in " + duration + " milliseconds (" + df.format((rounds/duration)*1000/1024) + " kEPS, event size " + recordSize + ", total of " + df.format(totalSizeMB) + " MB, " + df.format(totalSizeMB/duration*1000) +" MB/s))");
+        float totalSizeMB = ((float) recordSize * rounds)/1024f/1024f;
+        System.out.println("Ran <"+name+"> for <"+String.format("%,d", rounds)+"> rounds in " + duration + " milliseconds (" + df.format(rounds/duration) + " kEPS, event size " + recordSize + ", total of " + df.format(totalSizeMB) + " MB, " + df.format(totalSizeMB/(duration/1000f)) +" MB/s))");
     }
 }

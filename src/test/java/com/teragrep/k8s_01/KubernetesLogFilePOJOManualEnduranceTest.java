@@ -54,18 +54,19 @@ public class KubernetesLogFilePOJOManualEnduranceTest {
     }
 
     private void runEndurance(String name, byte[] record) {
-        System.out.println("Running <" + name + "> with <" + record.length + "> record size");
+        float payloadSize = (float) record.length;
+        System.out.println("Running <" + name + "> with <" + payloadSize + "> record size");
         final boolean[] run = {true};
         new Thread(() -> {
             try {
-                Thread.sleep(2*60*1000);
+                Thread.sleep(3*60*1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             run[0] = false;
         }).start();
 
-        float rounds = 0;
+        int rounds = 0;
         Instant start = Instant.now();
         while(run[0]) {
             KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record);
@@ -75,8 +76,8 @@ public class KubernetesLogFilePOJOManualEnduranceTest {
         Instant end = Instant.now();
         long duration = end.toEpochMilli() - start.toEpochMilli();
         DecimalFormat df = new DecimalFormat("#.##");
-        float totalSizeMB = (record.length * rounds) /1024/1024;
-        System.out.println("Ran <"+name+"> for <"+df.format(rounds/1000)+">K rounds in " + duration + " milliseconds (" + df.format((rounds/duration)*1000/1024) + " kEPS, event size " + record.length + ", total of " + df.format(totalSizeMB) + " MB, " + df.format(totalSizeMB/duration*1000) +" MB/s))");
+        float totalSizeMB = (payloadSize * rounds)/1024f/1024f;
+        System.out.println("Ran <"+name+"> for <"+String.format("%,d", rounds)+"> rounds in " + (duration/1000f) + " seconds (" + df.format((float)rounds/duration) + " kEPS, event size " + payloadSize + ", total of " + df.format(totalSizeMB) + " MB, " + df.format(totalSizeMB/(duration/1000f)) +" MB/s)");
         List<GarbageCollectorMXBean> gcBeans = ManagementFactory.getGarbageCollectorMXBeans();
         for (GarbageCollectorMXBean gcBean : gcBeans) {
             System.out.println("GC Name: " + gcBean.getName() + ", count: " + gcBean.getCollectionCount() + ", time: " + gcBean.getCollectionTime() + " ms");
