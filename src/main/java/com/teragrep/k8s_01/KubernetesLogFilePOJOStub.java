@@ -17,10 +17,8 @@
 
 package com.teragrep.k8s_01;
 
-import java.util.List;
-
 public class KubernetesLogFilePOJOStub implements KubernetesLogFilePOJO {
-    public KubernetesLogFilePOJOStub append(Fragment log) {
+    public KubernetesLogFilePOJOStub append(byte[] log) {
         throw new UnsupportedOperationException("Stub does not support append");
     }
 
@@ -41,12 +39,12 @@ public class KubernetesLogFilePOJOStub implements KubernetesLogFilePOJO {
     }
 
 
-    public String payload() {
-        throw new UnsupportedOperationException("Stub does not support log");
+    public byte[] payload() {
+        throw new UnsupportedOperationException("Stub does not support payload");
     }
 
-    public Fragment payloadFragment() {
-        throw new UnsupportedOperationException("Stub does not support log");
+    public String payloadString() {
+        throw new UnsupportedOperationException("Stub does not support payloadString");
     }
 
     @Override

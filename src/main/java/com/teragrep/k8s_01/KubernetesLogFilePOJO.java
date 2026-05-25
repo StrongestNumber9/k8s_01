@@ -22,7 +22,7 @@ public interface KubernetesLogFilePOJO {
     String timestamp();
     String stream();
     boolean partial();
-    String payload();
-    Fragment payloadFragment();
-    KubernetesLogFilePOJO append(Fragment log);
+    byte[] payload();
+    String payloadString();
+    KubernetesLogFilePOJO append(byte[] log);
 }

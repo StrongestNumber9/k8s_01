@@ -17,40 +17,70 @@
 
 package com.teragrep.k8s_01;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
-    private final Fragment timestamp;
-    private final Fragment stream;
-    private final Fragment partial;
-    private final Fragment log;
-    private final List<Fragment> logs;
+    private final byte[] timestamp;
+    private final byte[] stream;
+    private final byte[] partial;
+    private final byte[] log;
+    private final List<byte[]> logs;
+    private int offset = 0;
 
     public KubernetesLogFilePOJOImpl(byte[] record) {
-        this.timestamp = new Fragment(64, new SpaceDelimiterFunction());
-        this.stream = new Fragment(10, new SpaceDelimiterFunction());
-        this.partial = new Fragment(1, new SpaceDelimiterFunction());
-        this.log = new Fragment(record.length, new LogReaderFunction());
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(record)));
+        this.timestamp = readRecord(bufferedReader);
+        this.stream = readRecord(bufferedReader);
+        this.partial = readRecord(bufferedReader);
+        this.log = readRest(bufferedReader, record.length-offset);
         this.logs = new ArrayList<>();
-        ByteStream byteStream = new ByteStream(new ByteArrayInputStream(record));
-        Consumer<ByteStream> streamConsumer = timestamp.andThen(
-                stream.andThen(
-                        partial.andThen(
-                                log
-                        )
-                )
-        );
         this.logs.add(log);
-        byteStream.next();
-        streamConsumer.accept(byteStream);
+        try {
+            bufferedReader.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public KubernetesLogFilePOJOImpl(Fragment timestamp, Fragment stream, Fragment partial, Fragment log, List<Fragment> logs) {
+    private byte[] readRecord(BufferedReader bufferedReader) {
+        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            int ret;
+            while ((ret = bufferedReader.read()) != -1) {
+                final char c = (char) ret;
+                if (c == ' ') {
+                    break;
+                }
+                byteArrayOutputStream.write(c);
+            }
+        } catch(IOException _) {
+        }
+        offset += byteArrayOutputStream.size();
+        return byteArrayOutputStream.toByteArray();
+    }
+
+    private byte[] readRest(BufferedReader bufferedReader, int maxSize) {
+        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            final char[] buffer = new char[maxSize];
+            int charsRead;
+            while ((charsRead = bufferedReader.read(buffer)) != -1) {
+                byteArrayOutputStream.write(StandardCharsets.UTF_8.encode(CharBuffer.wrap(buffer)).array(), 0, charsRead);
+            }
+        } catch(IOException _) {
+        }
+        return byteArrayOutputStream.toByteArray();
+    }
+
+    public KubernetesLogFilePOJOImpl(byte[] timestamp, byte[] stream, byte[] partial, byte[] log, List<byte[]> logs) {
         this.timestamp = timestamp;
         this.stream = stream;
         this.partial = partial;
@@ -59,31 +89,30 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
         logs.add(log);
     }
 
-
-    public KubernetesLogFilePOJO append(Fragment log) {
+    public KubernetesLogFilePOJO append(byte[] log) {
         return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, log, logs);
     }
 
     public String timestamp() {
-        return timestamp.toString();
+        return new String(timestamp, StandardCharsets.UTF_8);
     }
 
     public String stream() {
-        return stream.toString();
+        return new String(stream, StandardCharsets.UTF_8);
     }
 
     public boolean partial() {
-        return partial.toString().equalsIgnoreCase("P");
+        return new String(partial, StandardCharsets.UTF_8).equalsIgnoreCase("P");
     }
 
-    public Fragment payloadFragment() {
+    public byte[] payload() {
         return log;
     }
 
-    public String payload() {
+    public String payloadString() {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        for(Fragment fragment : logs) {
-            byteArrayOutputStream.writeBytes(fragment.toBytes());
+        for(byte[] bytes : logs) {
+            byteArrayOutputStream.writeBytes(bytes);
         }
         return byteArrayOutputStream.toString(StandardCharsets.UTF_8);
     }

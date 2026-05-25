@@ -94,12 +94,12 @@ public class K8SConsumer implements Consumer<FileRecord> {
             }
             if(log.partial()) {
                 LOGGER.debug("Appending to existing partial record");
-                lastRecord.set(lastRecord.get().append(log.payloadFragment()));
+                lastRecord.set(lastRecord.get().append(log.payload()));
                 return;
             }
             if(!lastRecord.get().stub()) {
                 LOGGER.debug("Finishing a partial record");
-                log = lastRecord.get().append(log.payloadFragment());
+                log = lastRecord.get().append(log.payload());
             }
 
             UUID uuid = java.util.UUID.randomUUID();
@@ -305,7 +305,7 @@ public class K8SConsumer implements Consumer<FileRecord> {
                     .withSDElement(sdEventNodeSource)
                     .withSDElement(sdEventId)
                     .withSDElement(sdMetadata)
-                    .withMsg(log.payload());
+                    .withMsg(log.payloadString());
             try {
                 RelpOutput output = relpOutputPool.take();
                 output.send(syslog);
