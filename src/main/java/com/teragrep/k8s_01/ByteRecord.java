@@ -31,9 +31,6 @@ public class ByteRecord {
             if(record[i]==' ') {
                 spaceOffsets[currentSpace]=i;
                 currentSpace++;
-                if(currentSpace == 3) {
-                    break;
-                }
             }
         }
         return new KubernetesLogFilePOJOImpl(
