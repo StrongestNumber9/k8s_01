@@ -86,4 +86,10 @@ public class KubernetesLogFilePOJOTest {
         Assertions.assertNotEquals(end.timestamp(), combined.timestamp());
         Assertions.assertEquals("Start message, middle here, end here", combined.payloadString());
     }
+
+    @Test
+    public void testInvalidRecored() {
+        String record = "2026-05-08T13:18:22.542002411+03:00 stdou";
+        Assertions.assertThrowsExactly(RuntimeException.class, () -> new ByteRecord(record.getBytes()).toKubePOJO());
+    }
 }

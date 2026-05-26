@@ -33,6 +33,9 @@ public class ByteRecord {
                 currentSpace++;
             }
         }
+        if(currentSpace != 3) {
+            throw new RuntimeException("Record did not populate all expected fields");
+        }
         return new KubernetesLogFilePOJOImpl(
                 Arrays.copyOfRange(record, 0, spaceOffsets[0]), // timestamp
                 Arrays.copyOfRange(record, spaceOffsets[0]+1, spaceOffsets[1]), // Stream
