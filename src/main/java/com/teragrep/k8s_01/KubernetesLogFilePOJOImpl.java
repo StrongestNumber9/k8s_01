@@ -20,6 +20,7 @@ package com.teragrep.k8s_01;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
@@ -30,12 +31,7 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     private final List<byte[]> logs;
 
     public KubernetesLogFilePOJOImpl(byte[] timestamp, byte[] stream, byte[] partial, byte[] log) {
-        this.timestamp = timestamp;
-        this.stream = stream;
-        this.partial = partial;
-        this.log = log;
-        this.logs = new ArrayList<>();
-        this.logs.add(log);
+        this(timestamp, stream, partial, log, new ArrayList<>(Collections.singletonList(log)));
     }
 
     public KubernetesLogFilePOJOImpl(byte[] timestamp, byte[] stream, byte[] partial, byte[] log, List<byte[]> logs) {
@@ -44,11 +40,11 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
         this.partial = partial;
         this.log = log;
         this.logs = logs;
-        logs.add(log);
     }
 
-    public KubernetesLogFilePOJO append(byte[] log) {
-        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, log, logs);
+    public KubernetesLogFilePOJO append(byte[] newLog) {
+        this.logs.add(newLog);
+        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, newLog, logs);
     }
 
     public String timestamp() {
