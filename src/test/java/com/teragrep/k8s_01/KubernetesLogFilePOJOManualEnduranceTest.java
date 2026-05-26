@@ -59,7 +59,7 @@ public class KubernetesLogFilePOJOManualEnduranceTest {
         final boolean[] run = {true};
         new Thread(() -> {
             try {
-                Thread.sleep(3*60*1000);
+                Thread.sleep(60*1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

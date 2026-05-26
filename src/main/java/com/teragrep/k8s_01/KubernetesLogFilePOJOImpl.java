@@ -25,6 +25,7 @@ import java.io.InputStreamReader;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
@@ -33,51 +34,25 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     private final byte[] partial;
     private final byte[] log;
     private final List<byte[]> logs;
-    private int offset = 0;
 
     public KubernetesLogFilePOJOImpl(byte[] record) {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(record)));
-        this.timestamp = readRecord(bufferedReader);
-        this.stream = readRecord(bufferedReader);
-        this.partial = readRecord(bufferedReader);
-        this.log = readRest(bufferedReader, record.length-offset);
-        this.logs = new ArrayList<>();
-        this.logs.add(log);
-        try {
-            bufferedReader.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private byte[] readRecord(BufferedReader bufferedReader) {
-        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        try {
-            int ret;
-            while ((ret = bufferedReader.read()) != -1) {
-                final char c = (char) ret;
-                if (c == ' ') {
+        int[] spaceOffsets = new int[4];
+        int currentSpace = 0;
+        for (int i=0; i<record.length && currentSpace<3; i++) {
+            if(record[i]==' ') {
+                spaceOffsets[currentSpace]=i;
+                currentSpace++;
+                if(currentSpace == 3) {
                     break;
                 }
-                byteArrayOutputStream.write(c);
             }
-        } catch(IOException _) {
         }
-        offset += byteArrayOutputStream.size();
-        return byteArrayOutputStream.toByteArray();
-    }
-
-    private byte[] readRest(BufferedReader bufferedReader, int maxSize) {
-        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        try {
-            final char[] buffer = new char[maxSize];
-            int charsRead;
-            while ((charsRead = bufferedReader.read(buffer)) != -1) {
-                byteArrayOutputStream.write(StandardCharsets.UTF_8.encode(CharBuffer.wrap(buffer)).array(), 0, charsRead);
-            }
-        } catch(IOException _) {
-        }
-        return byteArrayOutputStream.toByteArray();
+        this.timestamp = Arrays.copyOfRange(record, 0, spaceOffsets[0]);
+        this.stream = Arrays.copyOfRange(record, spaceOffsets[0]+1, spaceOffsets[1]);
+        this.partial = Arrays.copyOfRange(record, spaceOffsets[1]+1, spaceOffsets[2]);
+        this.log = Arrays.copyOfRange(record, spaceOffsets[2]+1, record.length);
+        this.logs = new ArrayList<>();
+        this.logs.add(log);
     }
 
     public KubernetesLogFilePOJOImpl(byte[] timestamp, byte[] stream, byte[] partial, byte[] log, List<byte[]> logs) {
