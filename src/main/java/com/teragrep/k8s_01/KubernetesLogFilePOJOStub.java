@@ -22,10 +22,6 @@ public class KubernetesLogFilePOJOStub implements KubernetesLogFilePOJO {
         throw new UnsupportedOperationException("Stub does not support append");
     }
 
-    public boolean stub() {
-        return true;
-    }
-
     public String timestamp() {
         throw new UnsupportedOperationException("Stub does not support timestamp");
     }
@@ -50,5 +46,10 @@ public class KubernetesLogFilePOJOStub implements KubernetesLogFilePOJO {
     @Override
     public String toString() {
         return "KubernetesLogFilePOJOStub{}";
+    }
+
+    @Override
+    public boolean isStub() {
+        return false;
     }
 }

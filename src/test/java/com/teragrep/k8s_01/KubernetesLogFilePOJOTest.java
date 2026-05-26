@@ -69,7 +69,7 @@ public class KubernetesLogFilePOJOTest {
     public void testStub() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Stub Test";
         KubernetesLogFilePOJO log = new ByteRecord(record.getBytes()).toKubePOJO();
-        Assertions.assertFalse(log.stub());
+        Assertions.assertFalse(log.isStub());
     }
 
     @Test

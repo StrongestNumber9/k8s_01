@@ -41,6 +41,12 @@
     <url>https://github.com/teragrep/k8s_01/tree/master</url>
   </scm>
   <dependencies>
+    <!-- Stubable -->
+    <dependency>
+      <groupId>com.teragrep</groupId>
+      <artifactId>stb_01</artifactId>
+      <version>1.0.0</version>
+    </dependency>
     <!-- Java Stateful File Reader to read the logs -->
     <dependency>
       <groupId>com.teragrep</groupId>

@@ -87,7 +87,7 @@ public class K8SConsumer implements Consumer<FileRecord> {
     @Override
     public void accept(FileRecord record) {
             KubernetesLogFilePOJO log = new ByteRecord(record.getRecord()).toKubePOJO();
-            if (lastRecord.get().stub() && log.partial()) {
+            if (lastRecord.get().isStub() && log.partial()) {
                 LOGGER.debug("Starting a new partial record");
                 lastRecord.set(log);
                 return;
@@ -97,7 +97,7 @@ public class K8SConsumer implements Consumer<FileRecord> {
                 lastRecord.set(lastRecord.get().append(log.payload()));
                 return;
             }
-            if(!lastRecord.get().stub()) {
+            if(!lastRecord.get().isStub()) {
                 LOGGER.debug("Finishing a partial record");
                 log = lastRecord.get().append(log.payload());
             }

@@ -17,15 +17,9 @@
 
 package com.teragrep.k8s_01;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
@@ -82,7 +76,7 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     }
 
     @Override
-    public boolean stub() {
+    public boolean isStub() {
         return false;
     }
 }

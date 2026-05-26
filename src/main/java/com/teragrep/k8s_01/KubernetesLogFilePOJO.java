@@ -17,8 +17,9 @@
 
 package com.teragrep.k8s_01;
 
-public interface KubernetesLogFilePOJO {
-    boolean stub();
+import com.teragrep.stb_01.Stubable;
+
+public interface KubernetesLogFilePOJO extends Stubable {
     String timestamp();
     String stream();
     boolean partial();
