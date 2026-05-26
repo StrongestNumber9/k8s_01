@@ -31,7 +31,7 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     private final List<byte[]> logs;
 
     public KubernetesLogFilePOJOImpl(byte[] timestamp, byte[] stream, byte[] partial, byte[] log) {
-        this(timestamp, stream, partial, log, new ArrayList<>(Collections.singletonList(log)));
+        this(timestamp, stream, partial, log, Collections.singletonList(log));
     }
 
     public KubernetesLogFilePOJOImpl(byte[] timestamp, byte[] stream, byte[] partial, byte[] log, List<byte[]> logs) {
@@ -43,8 +43,9 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     }
 
     public KubernetesLogFilePOJO append(byte[] newLog) {
-        this.logs.add(newLog);
-        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, newLog, logs);
+        List<byte[]> newLogs = new ArrayList<>(this.logs);
+        newLogs.add(newLog);
+        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, newLog, newLogs);
     }
 
     public String timestamp() {
