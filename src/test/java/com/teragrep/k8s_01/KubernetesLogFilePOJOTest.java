@@ -45,17 +45,17 @@ public class KubernetesLogFilePOJOTest {
     }
 
     @Test
-    public void testPartialFalse() {
+    public void testIsPartialFalse() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Partial Test / False";
         KubernetesLogFilePOJO log = new ByteRecord(record.getBytes()).toKubePOJO();
-        Assertions.assertFalse(log.partial());
+        Assertions.assertFalse(log.isPartial());
     }
 
     @Test
-    public void testPartialTrue() {
+    public void testIsPartialTrue() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout P Partial Test / True";
         KubernetesLogFilePOJO log = new ByteRecord(record.getBytes()).toKubePOJO();
-        Assertions.assertTrue(log.partial());
+        Assertions.assertTrue(log.isPartial());
     }
 
     @Test

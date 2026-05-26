@@ -30,7 +30,7 @@ public class KubernetesLogFilePOJOStub implements KubernetesLogFilePOJO {
         throw new UnsupportedOperationException("Stub does not support stream");
     }
 
-    public boolean partial() {
+    public boolean isPartial() {
         throw new UnsupportedOperationException("Stub does not support partial");
     }
 

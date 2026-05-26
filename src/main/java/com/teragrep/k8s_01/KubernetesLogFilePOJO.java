@@ -22,7 +22,7 @@ import com.teragrep.stb_01.Stubable;
 public interface KubernetesLogFilePOJO extends Stubable {
     String timestamp();
     String stream();
-    boolean partial();
+    boolean isPartial();
     byte[] payload();
     String payloadString();
     KubernetesLogFilePOJO append(byte[] log);

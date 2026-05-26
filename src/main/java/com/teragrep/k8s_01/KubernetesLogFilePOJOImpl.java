@@ -59,7 +59,7 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
         return new String(stream, StandardCharsets.UTF_8);
     }
 
-    public boolean partial() {
+    public boolean isPartial() {
         return new String(partial, StandardCharsets.UTF_8).equalsIgnoreCase("P");
     }
 
