@@ -35,22 +35,11 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     private final byte[] log;
     private final List<byte[]> logs;
 
-    public KubernetesLogFilePOJOImpl(byte[] record) {
-        int[] spaceOffsets = new int[4];
-        int currentSpace = 0;
-        for (int i=0; i<record.length && currentSpace<3; i++) {
-            if(record[i]==' ') {
-                spaceOffsets[currentSpace]=i;
-                currentSpace++;
-                if(currentSpace == 3) {
-                    break;
-                }
-            }
-        }
-        this.timestamp = Arrays.copyOfRange(record, 0, spaceOffsets[0]);
-        this.stream = Arrays.copyOfRange(record, spaceOffsets[0]+1, spaceOffsets[1]);
-        this.partial = Arrays.copyOfRange(record, spaceOffsets[1]+1, spaceOffsets[2]);
-        this.log = Arrays.copyOfRange(record, spaceOffsets[2]+1, record.length);
+    public KubernetesLogFilePOJOImpl(byte[] timestamp, byte[] stream, byte[] partial, byte[] log) {
+        this.timestamp = timestamp;
+        this.stream = stream;
+        this.partial = partial;
+        this.log = log;
         this.logs = new ArrayList<>();
         this.logs.add(log);
     }

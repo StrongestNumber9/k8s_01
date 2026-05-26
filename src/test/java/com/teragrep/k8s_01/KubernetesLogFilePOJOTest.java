@@ -26,14 +26,14 @@ public class KubernetesLogFilePOJOTest {
     @Test
     public void testTimestampFormat() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Timestamp Test";
-        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record.getBytes(StandardCharsets.UTF_8));
+        KubernetesLogFilePOJO log = new ByteRecord(record.getBytes()).toKubePojo();
         Assertions.assertEquals("2026-05-08T13:18:22.542002411+03:00", log.timestamp());
     }
 
     @Test
     public void testTimestampParsesToInstant() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Timestamp Test";
-        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record.getBytes(StandardCharsets.UTF_8));
+        KubernetesLogFilePOJO log = new ByteRecord(record.getBytes()).toKubePojo();
         Instant timestamp = Instant.parse(log.timestamp());
         Assertions.assertEquals("2026-05-08T10:18:22.542002411Z", timestamp.toString());
     }
@@ -41,35 +41,35 @@ public class KubernetesLogFilePOJOTest {
     @Test
     public void testStream() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Stream Test";
-        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record.getBytes(StandardCharsets.UTF_8));
+        KubernetesLogFilePOJO log = new ByteRecord(record.getBytes()).toKubePojo();
         Assertions.assertEquals("stdout", log.stream());
     }
 
     @Test
     public void testPartialFalse() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Partial Test / False";
-        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record.getBytes(StandardCharsets.UTF_8));
+        KubernetesLogFilePOJO log = new ByteRecord(record.getBytes()).toKubePojo();
         Assertions.assertFalse(log.partial());
     }
 
     @Test
     public void testPartialTrue() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout P Partial Test / True";
-        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record.getBytes(StandardCharsets.UTF_8));
+        KubernetesLogFilePOJO log = new ByteRecord(record.getBytes()).toKubePojo();
         Assertions.assertTrue(log.partial());
     }
 
     @Test
     public void testPayloadFragment() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Log Test";
-        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record.getBytes(StandardCharsets.UTF_8));
+        KubernetesLogFilePOJO log = new ByteRecord(record.getBytes()).toKubePojo();
         Assertions.assertEquals("Log Test", log.payloadString());
     }
 
     @Test
     public void testStub() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Stub Test";
-        KubernetesLogFilePOJO log = new KubernetesLogFilePOJOImpl(record.getBytes(StandardCharsets.UTF_8));
+        KubernetesLogFilePOJO log = new ByteRecord(record.getBytes()).toKubePojo();
         Assertions.assertFalse(log.stub());
     }
 
@@ -78,9 +78,9 @@ public class KubernetesLogFilePOJOTest {
         String record_start = "2026-05-08T11:11:11.123456789+03:00 stdout P Start message";
         String record_middle = "2026-05-08T12:12:12.234567890+03:00 stdout P , middle here";
         String record_end = "2026-05-08T12:12:12.987654321+03:00 stdout F , end here";
-        KubernetesLogFilePOJO start = new KubernetesLogFilePOJOImpl(record_start.getBytes(StandardCharsets.UTF_8));
-        KubernetesLogFilePOJO middle = new KubernetesLogFilePOJOImpl(record_middle.getBytes(StandardCharsets.UTF_8));
-        KubernetesLogFilePOJO end = new KubernetesLogFilePOJOImpl(record_end.getBytes(StandardCharsets.UTF_8));
+        KubernetesLogFilePOJO start = new ByteRecord(record_start.getBytes()).toKubePojo();
+        KubernetesLogFilePOJO middle = new ByteRecord(record_middle.getBytes()).toKubePojo();
+        KubernetesLogFilePOJO end = new ByteRecord(record_end.getBytes()).toKubePojo();
         KubernetesLogFilePOJO combined = start.append(middle.payload()).append(end.payload());
         // Timestamp should not change when appending
         Assertions.assertEquals(start.timestamp(), combined.timestamp());
