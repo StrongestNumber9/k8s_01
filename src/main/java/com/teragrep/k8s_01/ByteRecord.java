@@ -25,7 +25,6 @@ public class ByteRecord {
     }
 
     public KubernetesLogFilePOJOImpl toKubePojo() {
-
         int[] spaceOffsets = new int[4];
         int currentSpace = 0;
         for (int i=0; i<record.length && currentSpace<3; i++) {
