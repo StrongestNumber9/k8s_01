@@ -34,7 +34,7 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
         byte[] record = "2026-05-08T11:11:11.123456789+03:00 stdout F Start message".getBytes(StandardCharsets.UTF_8);
         Instant start = Instant.now();
         for(int i = 0; i < rounds; i++) {
-            KubernetesLogFilePOJO log = new ByteRecord(record).toKubePojo();
+            KubernetesLogFilePOJO log = new ByteRecord(record).toKubePOJO();
             Assertions.assertNotNull(log.payloadString());
         }
         Instant end = Instant.now();
@@ -49,7 +49,7 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
         byte[] record = ("2026-05-08T11:11:11.123456789+03:00 stdout F " + payload).getBytes(StandardCharsets.UTF_8);
         Instant start = Instant.now();
         for(int i = 0; i < rounds; i++) {
-            KubernetesLogFilePOJO log = new ByteRecord(record).toKubePojo();
+            KubernetesLogFilePOJO log = new ByteRecord(record).toKubePOJO();
             Assertions.assertNotNull(log.payloadString());
         }
         Instant end = Instant.now();
@@ -64,7 +64,7 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
         byte[] record = ("2026-05-08T11:11:11.123456789+03:00 stdout F " + payload).getBytes(StandardCharsets.UTF_8);
         Instant start = Instant.now();
         for(int i = 0; i < rounds; i++) {
-            KubernetesLogFilePOJO log = new ByteRecord(record).toKubePojo();
+            KubernetesLogFilePOJO log = new ByteRecord(record).toKubePOJO();
             Assertions.assertNotNull(log.payloadString());
         }
         Instant end = Instant.now();
@@ -79,8 +79,8 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
         byte[] second = "2026-05-08T12:12:12.987654321+03:00 stdout F , end here".getBytes(StandardCharsets.UTF_8);
         Instant start = Instant.now();
         for(int i = 0; i < rounds; i++) {
-            KubernetesLogFilePOJO log = new ByteRecord(first).toKubePojo();
-            KubernetesLogFilePOJO append = new ByteRecord(second).toKubePojo();
+            KubernetesLogFilePOJO log = new ByteRecord(first).toKubePOJO();
+            KubernetesLogFilePOJO append = new ByteRecord(second).toKubePOJO();
             KubernetesLogFilePOJO combined = log.append(append.payload());
             Assertions.assertNotNull(combined.payloadString());
         }
@@ -97,8 +97,8 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
         byte[] second = ("2026-05-08T12:12:12.987654321+03:00 stdout F "+payload).getBytes(StandardCharsets.UTF_8);
         Instant start = Instant.now();
         for(int i = 0; i < rounds; i++) {
-            KubernetesLogFilePOJO log = new ByteRecord(first).toKubePojo();
-            KubernetesLogFilePOJO append = new ByteRecord(second).toKubePojo();
+            KubernetesLogFilePOJO log = new ByteRecord(first).toKubePOJO();
+            KubernetesLogFilePOJO append = new ByteRecord(second).toKubePOJO();
             KubernetesLogFilePOJO combined = log.append(append.payload());
             Assertions.assertNotNull(combined.payloadString());
         }
