@@ -19,7 +19,10 @@ package com.teragrep.k8s_01;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.List;
 
 public class KubernetesLogFilePOJOTest {
     @Test
@@ -82,9 +85,15 @@ public class KubernetesLogFilePOJOTest {
         KubernetesLogFilePOJO end = new ByteRecord(record_end.getBytes()).toKubePOJO();
         KubernetesLogFilePOJO combined = start.append(middle.payload()).append(end.payload());
         // Timestamp should not change when appending
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        List<KubernetesPayloadPOJO> payloads = combined.payloads();
+        for(KubernetesPayloadPOJO payload : payloads) {
+            byteArrayOutputStream.writeBytes(payload.payload());
+        }
         Assertions.assertEquals(start.timestamp(), combined.timestamp());
         Assertions.assertNotEquals(end.timestamp(), combined.timestamp());
-        Assertions.assertEquals("Start message, middle here, end here", combined.payload().toString());
+        Assertions.assertEquals("Start message, middle here, end here", byteArrayOutputStream.toString(StandardCharsets.UTF_8));
     }
 
     @Test

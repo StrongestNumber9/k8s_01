@@ -45,10 +45,6 @@ public class KubernetesLogFilePOJOStub implements KubernetesLogFilePOJO {
         throw new UnsupportedOperationException("Stub does not support payloads");
     }
 
-    public String payloadString() {
-        throw new UnsupportedOperationException("Stub does not support payloadString");
-    }
-
     @Override
     public String toString() {
         return "KubernetesLogFilePOJOStub{}";
