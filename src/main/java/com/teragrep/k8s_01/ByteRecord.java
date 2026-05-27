@@ -40,7 +40,7 @@ public class ByteRecord {
                 Arrays.copyOfRange(record, 0, spaceOffsets[0]), // timestamp
                 Arrays.copyOfRange(record, spaceOffsets[0]+1, spaceOffsets[1]), // Stream
                 Arrays.copyOfRange(record, spaceOffsets[1]+1, spaceOffsets[2]), // Partial
-                Arrays.copyOfRange(record, spaceOffsets[2]+1, record.length) // payload
+                new KubernetesPayloadPOJO(Arrays.copyOfRange(record, spaceOffsets[2]+1, record.length)) // payload
         );
     }
 }

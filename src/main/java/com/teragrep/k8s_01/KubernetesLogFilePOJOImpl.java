@@ -17,7 +17,6 @@
 
 package com.teragrep.k8s_01;
 
-import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,25 +26,25 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     private final byte[] timestamp;
     private final byte[] stream;
     private final byte[] partial;
-    private final byte[] log;
-    private final List<byte[]> logs;
+    private final KubernetesPayloadPOJO payload;
+    private final List<KubernetesPayloadPOJO> payloads;
 
-    public KubernetesLogFilePOJOImpl(byte[] timestamp, byte[] stream, byte[] partial, byte[] log) {
-        this(timestamp, stream, partial, log, Collections.singletonList(log));
+    public KubernetesLogFilePOJOImpl(byte[] timestamp, byte[] stream, byte[] partial, KubernetesPayloadPOJO payload) {
+        this(timestamp, stream, partial, payload, Collections.singletonList(payload));
     }
 
-    public KubernetesLogFilePOJOImpl(byte[] timestamp, byte[] stream, byte[] partial, byte[] log, List<byte[]> logs) {
+    public KubernetesLogFilePOJOImpl(byte[] timestamp, byte[] stream, byte[] partial, KubernetesPayloadPOJO payload, List<KubernetesPayloadPOJO> payloads) {
         this.timestamp = timestamp;
         this.stream = stream;
         this.partial = partial;
-        this.log = log;
-        this.logs = logs;
+        this.payload = payload;
+        this.payloads = payloads;
     }
 
-    public KubernetesLogFilePOJO append(byte[] newLog) {
-        List<byte[]> newLogs = new ArrayList<>(this.logs);
-        newLogs.add(newLog);
-        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, newLog, newLogs);
+    public KubernetesLogFilePOJO append(KubernetesPayloadPOJO newPayload) {
+        List<KubernetesPayloadPOJO> newPayloads = new ArrayList<>(this.payloads);
+        newPayloads.add(newPayload);
+        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, newPayload, newPayloads);
     }
 
     public String timestamp() {
@@ -60,16 +59,12 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
         return new String(partial, StandardCharsets.UTF_8).equalsIgnoreCase("P");
     }
 
-    public byte[] payload() {
-        return log;
+    public KubernetesPayloadPOJO payload() {
+        return payload;
     }
 
-    public String payloadString() {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        for(byte[] bytes : logs) {
-            byteArrayOutputStream.writeBytes(bytes);
-        }
-        return byteArrayOutputStream.toString(StandardCharsets.UTF_8);
+    public List<KubernetesPayloadPOJO> payloads() {
+        return payloads;
     }
 
     @Override

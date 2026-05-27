@@ -35,7 +35,7 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
         Instant start = Instant.now();
         for(int i = 0; i < rounds; i++) {
             KubernetesLogFilePOJO log = new ByteRecord(record).toKubePOJO();
-            Assertions.assertNotNull(log.payloadString());
+            Assertions.assertNotNull(log.payloads());
         }
         Instant end = Instant.now();
         long duration = end.toEpochMilli() - start.toEpochMilli();
@@ -50,7 +50,7 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
         Instant start = Instant.now();
         for(int i = 0; i < rounds; i++) {
             KubernetesLogFilePOJO log = new ByteRecord(record).toKubePOJO();
-            Assertions.assertNotNull(log.payloadString());
+            Assertions.assertNotNull(log.payloads());
         }
         Instant end = Instant.now();
         long duration = end.toEpochMilli() - start.toEpochMilli();
@@ -65,7 +65,7 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
         Instant start = Instant.now();
         for(int i = 0; i < rounds; i++) {
             KubernetesLogFilePOJO log = new ByteRecord(record).toKubePOJO();
-            Assertions.assertNotNull(log.payloadString());
+            Assertions.assertNotNull(log.payloads());
         }
         Instant end = Instant.now();
         long duration = end.toEpochMilli() - start.toEpochMilli();
@@ -82,7 +82,7 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
             KubernetesLogFilePOJO log = new ByteRecord(first).toKubePOJO();
             KubernetesLogFilePOJO append = new ByteRecord(second).toKubePOJO();
             KubernetesLogFilePOJO combined = log.append(append.payload());
-            Assertions.assertNotNull(combined.payloadString());
+            Assertions.assertNotNull(combined.payloads());
         }
         Instant end = Instant.now();
         long duration = end.toEpochMilli() - start.toEpochMilli();
@@ -100,7 +100,7 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
             KubernetesLogFilePOJO log = new ByteRecord(first).toKubePOJO();
             KubernetesLogFilePOJO append = new ByteRecord(second).toKubePOJO();
             KubernetesLogFilePOJO combined = log.append(append.payload());
-            Assertions.assertNotNull(combined.payloadString());
+            Assertions.assertNotNull(combined.payloads());
         }
         Instant end = Instant.now();
         long duration = end.toEpochMilli() - start.toEpochMilli();

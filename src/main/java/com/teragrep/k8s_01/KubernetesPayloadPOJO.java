@@ -1,5 +1,5 @@
 /*
-   Kubernetes log forwarder k8s_01
+   Kubernetes payload forwarder k8s_01
    Copyright (C) 2023  Suomen Kanuuna Oy
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,18 +14,21 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-
 package com.teragrep.k8s_01;
 
-import com.teragrep.stb_01.Stubable;
+import java.nio.charset.StandardCharsets;
+public class KubernetesPayloadPOJO {
+    private final byte[] payload;
+    KubernetesPayloadPOJO(byte[] payload) {
+        this.payload = payload;
+    }
 
-import java.util.List;
+    public byte[] payload() {
+        return payload;
+    }
 
-public interface KubernetesLogFilePOJO extends Stubable {
-    String timestamp();
-    String stream();
-    boolean isPartial();
-    KubernetesPayloadPOJO payload();
-    List<KubernetesPayloadPOJO> payloads();
-    KubernetesLogFilePOJO append(KubernetesPayloadPOJO log);
+    @Override
+    public String toString() {
+        return new String(payload, StandardCharsets.UTF_8);
+    }
 }

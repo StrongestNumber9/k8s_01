@@ -27,12 +27,16 @@ import com.teragrep.rlo_13.FileRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
@@ -294,6 +298,12 @@ public class K8SConsumer implements Consumer<FileRecord> {
                     uuid,
                     dockerMetadata
             );
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            List<KubernetesPayloadPOJO> payloads = log.payloads();
+            for(KubernetesPayloadPOJO payload : payloads) {
+                byteArrayOutputStream.writeBytes(payload.payload());
+            }
+
             SyslogMessage syslog = new SyslogMessage()
                     .withTimestamp(timestamp, true)
                     .withSeverity(Severity.WARNING)
@@ -305,7 +315,7 @@ public class K8SConsumer implements Consumer<FileRecord> {
                     .withSDElement(sdEventNodeSource)
                     .withSDElement(sdEventId)
                     .withSDElement(sdMetadata)
-                    .withMsg(log.payloadString());
+                    .withMsg(byteArrayOutputStream.toString(StandardCharsets.UTF_8));
             try {
                 RelpOutput output = relpOutputPool.take();
                 output.send(syslog);

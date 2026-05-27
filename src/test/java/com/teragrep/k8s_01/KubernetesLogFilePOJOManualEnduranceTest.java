@@ -70,7 +70,7 @@ public class KubernetesLogFilePOJOManualEnduranceTest {
         Instant start = Instant.now();
         while(run[0]) {
             KubernetesLogFilePOJO log = new ByteRecord(record).toKubePOJO();
-            Assertions.assertNotNull(log.payloadString());
+            Assertions.assertNotNull(log.payloads());
             rounds++;
         }
         Instant end = Instant.now();
