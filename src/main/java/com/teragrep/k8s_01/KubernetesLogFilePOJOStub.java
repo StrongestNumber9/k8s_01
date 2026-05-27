@@ -52,6 +52,6 @@ public class KubernetesLogFilePOJOStub implements KubernetesLogFilePOJO {
 
     @Override
     public boolean isStub() {
-        return false;
+        return true;
     }
 }
