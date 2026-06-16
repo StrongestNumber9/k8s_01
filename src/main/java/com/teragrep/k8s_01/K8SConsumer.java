@@ -90,22 +90,25 @@ public class K8SConsumer implements Consumer<FileRecord> {
     }
     @Override
     public void accept(FileRecord record) {
-            KubernetesLogFilePOJO log = new ByteRecord(record.getRecord()).toKubePOJO();
-            if (lastRecord.get().isStub() && log.isPartial()) {
-                LOGGER.debug("Starting a new partial record");
-                lastRecord.set(log);
-                return;
-            }
-            if(log.isPartial()) {
-                LOGGER.debug("Appending to existing partial record");
-                lastRecord.set(lastRecord.get().append(log.payload()));
-                return;
-            }
-            if(!lastRecord.get().isStub()) {
-                LOGGER.debug("Finishing a partial record");
-                log = lastRecord.get().append(log.payload());
-            }
+        KubernetesLogFilePOJO log = new ByteRecord(record.getRecord()).toKubePOJO();
+        if (lastRecord.get().isStub() && log.isPartial()) {
+            LOGGER.debug("Starting a new partial record");
+            lastRecord.set(log);
+        }
+        else if (log.isPartial()) {
+            LOGGER.debug("Appending to existing partial record");
+            lastRecord.set(lastRecord.get().append(log.payload()));
+        }
+        else if (!lastRecord.get().isStub()) {
+            LOGGER.debug("Finishing a partial record");
+            sendMessage(record, lastRecord.get().append(log.payload()));
+        }
+        else {
+            throw new RuntimeException("FileRecord is at impossible state");
+        }
+    }
 
+    public void sendMessage(FileRecord record, KubernetesLogFilePOJO log) {
             UUID uuid = java.util.UUID.randomUUID();
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug(
