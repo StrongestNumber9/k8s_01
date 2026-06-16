@@ -19,8 +19,10 @@ package com.teragrep.k8s_01;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     private final byte[] timestamp;
@@ -70,5 +72,17 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     @Override
     public boolean isStub() {
         return false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        KubernetesLogFilePOJOImpl that = (KubernetesLogFilePOJOImpl) o;
+        return Objects.deepEquals(timestamp, that.timestamp) && Objects.deepEquals(stream, that.stream) && Objects.deepEquals(partial, that.partial) && Objects.equals(payload, that.payload) && Objects.equals(payloads, that.payloads);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Arrays.hashCode(timestamp), Arrays.hashCode(stream), Arrays.hashCode(partial), payload, payloads);
     }
 }
