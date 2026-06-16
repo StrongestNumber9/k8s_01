@@ -91,7 +91,11 @@ public class K8SConsumer implements Consumer<FileRecord> {
     @Override
     public void accept(FileRecord record) {
         KubernetesLogFilePOJO log = new ByteRecord(record.getRecord()).toKubePOJO();
-        if (lastRecord.get().isStub() && log.isPartial()) {
+        if (lastRecord.get().isStub() && !log.isPartial()) {
+            LOGGER.debug("Sending a standalone record");
+            sendMessage(record, log);
+        }
+        else if (lastRecord.get().isStub() && log.isPartial()) {
             LOGGER.debug("Starting a new partial record");
             lastRecord.set(log);
         }
@@ -102,10 +106,6 @@ public class K8SConsumer implements Consumer<FileRecord> {
         else if (!lastRecord.get().isStub()) {
             LOGGER.debug("Finishing a partial record");
             sendMessage(record, lastRecord.get().append(log.payload()));
-        }
-        else if (lastRecord.get().isStub() && !log.isPartial()) {
-            LOGGER.debug("Sending a standalone record");
-            sendMessage(record, log);
         }
         else {
             throw new RuntimeException("FileRecord is at impossible state");
