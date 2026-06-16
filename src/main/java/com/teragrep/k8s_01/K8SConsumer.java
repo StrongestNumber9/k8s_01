@@ -103,6 +103,10 @@ public class K8SConsumer implements Consumer<FileRecord> {
             LOGGER.debug("Finishing a partial record");
             sendMessage(record, lastRecord.get().append(log.payload()));
         }
+        else if (lastRecord.get().isStub() && !log.isPartial()) {
+            LOGGER.debug("Sending a standalone record");
+            sendMessage(record, log);
+        }
         else {
             throw new RuntimeException("FileRecord is at impossible state");
         }
