@@ -25,7 +25,6 @@ import com.teragrep.net_01.server.ServerFactory;
 import com.teragrep.rlo_06.RFC5424Frame;
 import com.teragrep.rlo_12.DirectoryEventWatcher;
 import com.teragrep.rlo_13.StatefulFileReader;
-import com.teragrep.rlo_14.SyslogMessage;
 import com.teragrep.rlp_03.frame.FrameDelegationClockFactory;
 import com.teragrep.rlp_03.frame.delegate.DefaultFrameDelegate;
 import org.junit.jupiter.api.AfterEach;
@@ -91,7 +90,7 @@ public class K8SConsumerTest {
                 isr,
                 AppConfig.class
         );
-        KubernetesCachingAPIClient kubernetesCachingAPIClient = new FakeKubernetesCachingAPIClientImpl("example-input", "teragrep");
+        KubernetesCachingAPIClient kubernetesCachingAPIClient = new FakeKubernetesCachingAPIClientImpl();
         PrometheusMetrics prometheusMetrics = new PrometheusMetrics(appConfig.getMetrics().getPort());
         BlockingQueue<RelpOutput> relpOutputPool = new LinkedBlockingDeque<>(2);
         Assertions.assertDoesNotThrow(() -> relpOutputPool.put(new RelpOutput(appConfig.getRelp(), 0, prometheusMetrics.getRegistry())));
