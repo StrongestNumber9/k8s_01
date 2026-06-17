@@ -22,12 +22,6 @@ import com.teragrep.k8s_01.metadata.NamespaceMetadataContainer;
 import com.teragrep.k8s_01.metadata.PodMetadataContainer;
 
 public class FakeKubernetesCachingAPIClientImpl implements KubernetesCachingAPIClient {
-    private final String pod;
-    private final String namespace;
-    public FakeKubernetesCachingAPIClientImpl(String pod, String namespace) {
-        this.pod = pod;
-        this.namespace = namespace;
-    }
 
     @Override
     public PodMetadataContainer getPod(String namespace, String id) {
