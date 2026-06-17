@@ -1,0 +1,9 @@
+2026-01-01T12:00:00.000000010+03:00 stdout F Start of log
+2026-01-01T12:00:00.000000020+03:00 stdout F Big message incoming
+2026-01-01T12:00:00.000000031+03:00 stdout P Big partial message start gl
+2026-01-01T12:00:00.000000032+03:00 stdout P ue one gl
+2026-01-01T12:00:00.000000033+03:00 stdout P ue two gl
+2026-01-01T12:00:00.000000034+03:00 stdout F ue end
+2026-01-01T12:00:00.000000040+03:00 stdout F Big message sent
+2026-01-01T12:00:00.000000050+03:00 stdout F End of log
+2026-01-01T12:00:00.000000050+03:00 stdout P Trailing partial, not sent.

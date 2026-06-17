@@ -100,7 +100,7 @@ public class KubernetesLogReader {
                     appConfig.getKubernetes().getLabels().getWhitelist().getLabel()
             );
         }
-        KubernetesCachingAPIClient cacheClient = new KubernetesCachingAPIClient(appConfig.getKubernetes(), apiUrl);
+        KubernetesCachingAPIClient cacheClient = new KubernetesCachingAPIClientImpl(appConfig.getKubernetes(), apiUrl);
         PrometheusMetrics prometheusMetrics = new PrometheusMetrics(appConfig.getMetrics().getPort());
 
         // Pool of Relp output threads to be shared by every consumer

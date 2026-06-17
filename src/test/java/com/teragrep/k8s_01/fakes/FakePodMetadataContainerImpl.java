@@ -15,20 +15,34 @@
    limitations under the License.
 */
 
-package com.teragrep.k8s_01.metadata;
+package com.teragrep.k8s_01.fakes;
+
+import com.teragrep.k8s_01.metadata.PodMetadataContainer;
 
 import java.util.Map;
 
-public interface PodMetadataContainer {
-    String getCreationTimestamp();
+public class FakePodMetadataContainerImpl implements PodMetadataContainer {
+    public String getCreationTimestamp() {
+        return "dummy-timestamp";
+    }
 
-    String getPodId();
+    public String getPodId() {
+        return "dummy-podid";
+    }
 
-    Map<String, String> getLabels();
+    public Map<String, String> getLabels() {
+        return Map.of();
+    }
 
-    String getHost();
+    public String getHost() {
+        return "dummy-hostname";
+    }
 
-    String getPodname();
+    public String getPodname() {
+        return "dummy-podname";
+    }
 
-    String getNamespaceName();
+    public String getNamespaceName() {
+        return "teragrep";
+    }
 }

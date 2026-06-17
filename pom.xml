@@ -189,6 +189,21 @@
       <artifactId>maven-enforcer-plugin</artifactId>
       <version>3.3.0</version>
     </dependency>
+
+    <!-- Relp server for testing -->
+    <dependency>
+      <groupId>com.teragrep</groupId>
+      <artifactId>rlp_03</artifactId>
+      <version>10.0.0</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- RFC5424 parser for testing -->
+    <dependency>
+      <groupId>com.teragrep</groupId>
+      <artifactId>rlo_06</artifactId>
+      <version>10.0.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -242,6 +257,8 @@
             <exclude>k8s_01/README.adoc</exclude>
             <exclude>k8s_01/*.yaml</exclude>
             <exclude>k8s_01/templates/*.yaml</exclude>
+            <!-- test resources -->
+            <exclude>src/test/resources/**</exclude>
           </excludes>
         </configuration>
       </plugin>
@@ -332,6 +349,8 @@
         <configuration>
           <parallel>all</parallel>
           <trimStackTrace>false</trimStackTrace>
+          <!-- Required by rlo_13 -->
+          <argLine>--add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --enable-native-access=ALL-UNNAMED</argLine>
         </configuration>
       </plugin>
       <plugin>

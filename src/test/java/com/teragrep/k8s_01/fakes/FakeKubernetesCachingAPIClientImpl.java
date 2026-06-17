@@ -15,12 +15,27 @@
    limitations under the License.
 */
 
-package com.teragrep.k8s_01;
+package com.teragrep.k8s_01.fakes;
 
+import com.teragrep.k8s_01.KubernetesCachingAPIClient;
 import com.teragrep.k8s_01.metadata.NamespaceMetadataContainer;
 import com.teragrep.k8s_01.metadata.PodMetadataContainer;
 
-public interface KubernetesCachingAPIClient {
-    PodMetadataContainer getPod(String namespace, String id);
-    NamespaceMetadataContainer getNamespace(String namespace);
+public class FakeKubernetesCachingAPIClientImpl implements KubernetesCachingAPIClient {
+    private final String pod;
+    private final String namespace;
+    public FakeKubernetesCachingAPIClientImpl(String pod, String namespace) {
+        this.pod = pod;
+        this.namespace = namespace;
+    }
+
+    @Override
+    public PodMetadataContainer getPod(String namespace, String id) {
+        return new FakePodMetadataContainerImpl();
+    }
+
+    @Override
+    public NamespaceMetadataContainer getNamespace(String namespace) {
+        return new FakeNamespaceMetadataContainerImpl();
+    }
 }

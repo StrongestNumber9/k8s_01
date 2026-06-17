@@ -17,26 +17,10 @@
 
 package com.teragrep.k8s_01.metadata;
 
-import io.kubernetes.client.openapi.models.V1Namespace;
 import java.util.Map;
 
-/* POJO for storing V1Namespace information instead of the full object */
-public class NamespaceMetadataContainer {
-    private final String uid;
-    private final Map<String, String> labels;
-    public NamespaceMetadataContainer(V1Namespace namespace) {
-        if(namespace.getMetadata() == null) {
-            throw new RuntimeException("Namespace metadata is empty, can't continue.");
-        }
-        uid = namespace.getMetadata().getUid();
-        labels = namespace.getMetadata().getLabels();
-    }
+public interface NamespaceMetadataContainer {
+    String getUid();
 
-    public String getUid() {
-        return uid;
-    }
-
-    public Map<String, String> getLabels() {
-        return labels;
-    }
+    Map<String, String> getLabels();
 }
