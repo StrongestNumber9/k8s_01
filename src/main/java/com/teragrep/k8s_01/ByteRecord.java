@@ -36,11 +36,13 @@ public class ByteRecord {
         if(currentSpace != 3) {
             throw new RuntimeException("Record did not populate all expected fields");
         }
+        // Strip last character if linefeed
+        final int endsInLinefeed = (record[record.length-1]=='\n' ? 1 : 0);
         return new KubernetesLogFilePOJOImpl(
                 Arrays.copyOfRange(record, 0, spaceOffsets[0]), // timestamp
                 Arrays.copyOfRange(record, spaceOffsets[0]+1, spaceOffsets[1]), // Stream
                 Arrays.copyOfRange(record, spaceOffsets[1]+1, spaceOffsets[2]), // Partial
-                new KubernetesPayloadPOJO(Arrays.copyOfRange(record, spaceOffsets[2]+1, record.length)) // payload
+                new KubernetesPayloadPOJO(Arrays.copyOfRange(record, spaceOffsets[2]+1, record.length-endsInLinefeed)) // payload
         );
     }
 }
