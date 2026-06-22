@@ -88,11 +88,11 @@ public class K8SConsumer implements Consumer<FileRecord> {
         appConfig.getKubernetes().getMetadata().forEach(sdAdditionalMetadata::addSDParam);
     }
     @Override
-    public void accept(FileRecord record) {
-        KubernetesLogFilePOJO log = new ByteRecord(record.getRecord()).toKubePOJO();
+    public void accept(FileRecord fileRecord) {
+        KubernetesLogFilePOJO log = new ByteRecord(fileRecord.getRecord()).toKubePOJO();
         if (lastRecord.get().isStub() && !log.isPartial()) {
             LOGGER.debug("Sending a standalone record");
-            sendMessage(record, log);
+            sendMessage(fileRecord, log);
         }
         else if (lastRecord.get().isStub() && log.isPartial()) {
             LOGGER.debug("Starting a new partial record");
@@ -104,33 +104,33 @@ public class K8SConsumer implements Consumer<FileRecord> {
         }
         else if (!lastRecord.get().isStub()) {
             LOGGER.debug("Finishing a partial record");
-            sendMessage(record, lastRecord.get().append(log.payloads()));
+            sendMessage(fileRecord, lastRecord.get().append(log.payloads()));
         }
         else {
             throw new RuntimeException("FileRecord is at impossible state");
         }
     }
 
-    public void sendMessage(FileRecord record, KubernetesLogFilePOJO log) {
+    public void sendMessage(FileRecord fileRecord, KubernetesLogFilePOJO log) {
             UUID uuid = java.util.UUID.randomUUID();
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug(
                         "[{}] Got a new record from file: {}",
                         uuid,
-                        record.getPath()
+                        fileRecord.getPath()
                 );
                 LOGGER.debug(
                         "[{}] Reading {} starting from {}, file progress {}/{}",
                         uuid,
-                        record.getRecord().length,
-                        record.getStartOffset(),
-                        (int) (record.getStartOffset() + record.getRecord().length),
-                        record.getEndOffset()
+                        fileRecord.getRecord().length,
+                        fileRecord.getStartOffset(),
+                        (int) (fileRecord.getStartOffset() + fileRecord.getRecord().length),
+                        fileRecord.getEndOffset()
                 );
             }
-            String namespace = ContainerInfo.getNamespace(record.getFilename());
-            String podname = ContainerInfo.getPodname(record.getFilename());
-            String containerId = ContainerInfo.getContainerID(record.getFilename());
+            String namespace = ContainerInfo.getNamespace(fileRecord.getFilename());
+            String podname = ContainerInfo.getPodname(fileRecord.getFilename());
+            String containerId = ContainerInfo.getContainerID(fileRecord.getFilename());
             Instant instant;
             try {
                 instant = Instant.parse(log.timestamp());
@@ -144,8 +144,8 @@ public class K8SConsumer implements Consumer<FileRecord> {
                                 namespace,
                                 podname,
                                 containerId,
-                                record.getPath(),
-                                record.getStartOffset()
+                                fileRecord.getPath(),
+                                fileRecord.getStartOffset()
                         ),
                         e
                 );
@@ -182,7 +182,7 @@ public class K8SConsumer implements Consumer<FileRecord> {
             KubernetesMetadata kubernetesMetadata = new KubernetesMetadata(
                     namespaceMetadataContainer,
                     podMetadataContainer,
-                    ContainerInfo.getContainerName(record.getFilename()),
+                    ContainerInfo.getContainerName(fileRecord.getFilename()),
                     apiUrl
             );
             JsonObject dockerMetadata = new JsonObject();
@@ -285,7 +285,7 @@ public class K8SConsumer implements Consumer<FileRecord> {
 
             final SDElement sdEventNodeSource = new SDElement("event_node_source@48577");
             sdEventNodeSource.addSDParam(sdRealHostname);
-            sdEventNodeSource.addSDParam("source", record.getPath());
+            sdEventNodeSource.addSDParam("source", fileRecord.getPath());
             sdEventNodeSource.addSDParam(sdSourceModule);
 
             final SDElement sdEventId = new SDElement("event_id@48577");
