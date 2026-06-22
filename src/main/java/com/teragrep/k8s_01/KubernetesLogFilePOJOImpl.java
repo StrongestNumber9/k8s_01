@@ -43,28 +43,34 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
         this.payloads = payloads;
     }
 
+    @Override
     public KubernetesLogFilePOJO append(KubernetesPayloadPOJO newPayload) {
         List<KubernetesPayloadPOJO> newPayloads = new ArrayList<>(this.payloads);
         newPayloads.add(newPayload);
         return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, newPayload, newPayloads);
     }
 
+    @Override
     public String timestamp() {
         return new String(timestamp, StandardCharsets.UTF_8);
     }
 
+    @Override
     public String stream() {
         return new String(stream, StandardCharsets.UTF_8);
     }
 
+    @Override
     public boolean isPartial() {
         return new String(partial, StandardCharsets.UTF_8).equalsIgnoreCase("P");
     }
 
+    @Override
     public KubernetesPayloadPOJO payload() {
         return payload;
     }
 
+    @Override
     public List<KubernetesPayloadPOJO> payloads() {
         return payloads;
     }

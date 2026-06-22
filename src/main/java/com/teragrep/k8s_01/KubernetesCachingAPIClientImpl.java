@@ -137,6 +137,7 @@ class KubernetesCachingAPIClientImpl implements KubernetesCachingAPIClient {
                 .build(namespaceCacheLoader);
     }
 
+    @Override
     public PodMetadataContainer getPod(String namespace, String id) {
         HashMap<String, String> map = new HashMap<>();
         map.put("namespace", namespace);
@@ -156,6 +157,8 @@ class KubernetesCachingAPIClientImpl implements KubernetesCachingAPIClient {
         );
         return new PodMetadataContainerImpl(api.readNamespacedPod(id, namespace, null));
     }
+
+    @Override
     public NamespaceMetadataContainer getNamespace(String namespace) {
         LOGGER.trace(
                 "Getting namespace: {}",
