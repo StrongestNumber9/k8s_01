@@ -81,7 +81,7 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
         for(int i = 0; i < rounds; i++) {
             KubernetesLogFilePOJO log = new ByteRecord(first).toKubePOJO();
             KubernetesLogFilePOJO append = new ByteRecord(second).toKubePOJO();
-            KubernetesLogFilePOJO combined = log.append(append.payload());
+            KubernetesLogFilePOJO combined = log.append(append.payloads());
             Assertions.assertNotNull(combined.payloads());
         }
         Instant end = Instant.now();
@@ -99,7 +99,7 @@ public class KubernetesLogFilePOJOManualBenchmarkTest {
         for(int i = 0; i < rounds; i++) {
             KubernetesLogFilePOJO log = new ByteRecord(first).toKubePOJO();
             KubernetesLogFilePOJO append = new ByteRecord(second).toKubePOJO();
-            KubernetesLogFilePOJO combined = log.append(append.payload());
+            KubernetesLogFilePOJO combined = log.append(append.payloads());
             Assertions.assertNotNull(combined.payloads());
         }
         Instant end = Instant.now();

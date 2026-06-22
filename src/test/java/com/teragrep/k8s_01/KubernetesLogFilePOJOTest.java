@@ -65,7 +65,8 @@ public class KubernetesLogFilePOJOTest {
     public void testPayloadFragment() {
         String record = "2026-05-08T13:18:22.542002411+03:00 stdout F Log Test";
         KubernetesLogFilePOJO log = new ByteRecord(record.getBytes()).toKubePOJO();
-        Assertions.assertEquals("Log Test", log.payload().toString());
+        Assertions.assertEquals("Log Test", log.payloads().getFirst().toString());
+        Assertions.assertEquals(1, log.payloads().size());
     }
 
     @Test
@@ -83,7 +84,7 @@ public class KubernetesLogFilePOJOTest {
         KubernetesLogFilePOJO start = new ByteRecord(record_start.getBytes()).toKubePOJO();
         KubernetesLogFilePOJO middle = new ByteRecord(record_middle.getBytes()).toKubePOJO();
         KubernetesLogFilePOJO end = new ByteRecord(record_end.getBytes()).toKubePOJO();
-        KubernetesLogFilePOJO combined = start.append(middle.payload()).append(end.payload());
+        KubernetesLogFilePOJO combined = start.append(middle.payloads()).append(end.payloads());
         // Timestamp should not change when appending
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
