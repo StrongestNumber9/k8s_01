@@ -25,7 +25,6 @@ public interface KubernetesLogFilePOJO extends Stubable {
     String timestamp();
     String stream();
     boolean isPartial();
-    KubernetesPayloadPOJO payload();
     List<KubernetesPayloadPOJO> payloads();
-    KubernetesLogFilePOJO append(KubernetesPayloadPOJO payload);
+    KubernetesLogFilePOJO append(List<KubernetesPayloadPOJO> payload);
 }

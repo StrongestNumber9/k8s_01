@@ -20,27 +20,27 @@ package com.teragrep.k8s_01;
 import java.util.List;
 
 public class KubernetesLogFilePOJOStub implements KubernetesLogFilePOJO {
-    public KubernetesLogFilePOJOStub append(KubernetesPayloadPOJO kubernetesPayloadPOJO) {
+    @Override
+    public KubernetesLogFilePOJOStub append(List<KubernetesPayloadPOJO> kubernetesPayloadPOJOs) {
         throw new UnsupportedOperationException("Stub does not support append");
     }
 
+    @Override
     public String timestamp() {
         throw new UnsupportedOperationException("Stub does not support timestamp");
     }
 
+    @Override
     public String stream() {
         throw new UnsupportedOperationException("Stub does not support stream");
     }
 
+    @Override
     public boolean isPartial() {
         throw new UnsupportedOperationException("Stub does not support partial");
     }
 
-
-    public KubernetesPayloadPOJO payload() {
-        throw new UnsupportedOperationException("Stub does not support payload");
-    }
-
+    @Override
     public List<KubernetesPayloadPOJO> payloads() {
         throw new UnsupportedOperationException("Stub does not support payloads");
     }

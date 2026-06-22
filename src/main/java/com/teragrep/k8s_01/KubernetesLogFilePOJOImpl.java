@@ -28,26 +28,24 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     private final byte[] timestamp;
     private final byte[] stream;
     private final byte[] partial;
-    private final KubernetesPayloadPOJO payload;
     private final List<KubernetesPayloadPOJO> payloads;
 
     public KubernetesLogFilePOJOImpl(byte[] timestamp, byte[] stream, byte[] partial, KubernetesPayloadPOJO payload) {
-        this(timestamp, stream, partial, payload, Collections.singletonList(payload));
+        this(timestamp, stream, partial, Collections.singletonList(payload));
     }
 
-    public KubernetesLogFilePOJOImpl(byte[] timestamp, byte[] stream, byte[] partial, KubernetesPayloadPOJO payload, List<KubernetesPayloadPOJO> payloads) {
+    public KubernetesLogFilePOJOImpl(byte[] timestamp, byte[] stream, byte[] partial, List<KubernetesPayloadPOJO> payloads) {
         this.timestamp = timestamp;
         this.stream = stream;
         this.partial = partial;
-        this.payload = payload;
         this.payloads = payloads;
     }
 
     @Override
-    public KubernetesLogFilePOJO append(KubernetesPayloadPOJO newPayload) {
+    public KubernetesLogFilePOJO append(List<KubernetesPayloadPOJO> kubernetesPayloadPOJOs) {
         List<KubernetesPayloadPOJO> newPayloads = new ArrayList<>(this.payloads);
-        newPayloads.add(newPayload);
-        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, newPayload, newPayloads);
+        newPayloads.addAll(kubernetesPayloadPOJOs);
+        return new KubernetesLogFilePOJOImpl(timestamp, stream, partial, newPayloads);
     }
 
     @Override
@@ -66,11 +64,6 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     }
 
     @Override
-    public KubernetesPayloadPOJO payload() {
-        return payload;
-    }
-
-    @Override
     public List<KubernetesPayloadPOJO> payloads() {
         return payloads;
     }
@@ -84,11 +77,11 @@ public class KubernetesLogFilePOJOImpl implements KubernetesLogFilePOJO {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         KubernetesLogFilePOJOImpl that = (KubernetesLogFilePOJOImpl) o;
-        return Objects.deepEquals(timestamp, that.timestamp) && Objects.deepEquals(stream, that.stream) && Objects.deepEquals(partial, that.partial) && Objects.equals(payload, that.payload) && Objects.equals(payloads, that.payloads);
+        return Objects.deepEquals(timestamp, that.timestamp) && Objects.deepEquals(stream, that.stream) && Objects.deepEquals(partial, that.partial) && Objects.equals(payloads, that.payloads);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(Arrays.hashCode(timestamp), Arrays.hashCode(stream), Arrays.hashCode(partial), payload, payloads);
+        return Objects.hash(Arrays.hashCode(timestamp), Arrays.hashCode(stream), Arrays.hashCode(partial), payloads);
     }
 }
