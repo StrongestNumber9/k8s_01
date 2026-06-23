@@ -15,16 +15,34 @@
    limitations under the License.
 */
 
-package com.teragrep.k8s_01;
+package com.teragrep.k8s_01.fakes;
 
-import com.teragrep.stb_01.Stubable;
+import com.teragrep.k8s_01.metadata.PodMetadataContainer;
 
-import java.util.List;
+import java.util.Map;
 
-public interface KubernetesLogFilePOJO extends Stubable {
-    String timestamp();
-    String stream();
-    boolean isPartial();
-    List<KubernetesPayloadPOJO> payloads();
-    KubernetesLogFilePOJO append(List<KubernetesPayloadPOJO> payload);
+public class FakePodMetadataContainerImpl implements PodMetadataContainer {
+    public String getCreationTimestamp() {
+        return "dummy-timestamp";
+    }
+
+    public String getPodId() {
+        return "dummy-podid";
+    }
+
+    public Map<String, String> getLabels() {
+        return Map.of();
+    }
+
+    public String getHost() {
+        return "dummy-hostname";
+    }
+
+    public String getPodname() {
+        return "dummy-podname";
+    }
+
+    public String getNamespaceName() {
+        return "teragrep";
+    }
 }

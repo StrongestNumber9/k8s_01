@@ -18,9 +18,7 @@
 package com.teragrep.k8s_01;
 
 import com.teragrep.rlo_14.*;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.teragrep.k8s_01.config.AppConfig;
 import com.teragrep.k8s_01.metadata.KubernetesMetadata;
 import com.teragrep.k8s_01.metadata.NamespaceMetadataContainer;
@@ -29,6 +27,7 @@ import com.teragrep.rlo_13.FileRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -36,8 +35,10 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -46,7 +47,6 @@ import java.util.regex.Pattern;
  */
 public class K8SConsumer implements Consumer<FileRecord> {
     private static final Logger LOGGER = LoggerFactory.getLogger(K8SConsumer.class);
-    private static final Gson gson = new Gson();
     private final AppConfig appConfig;
     private final KubernetesCachingAPIClient cacheClient;
 
@@ -64,6 +64,8 @@ public class K8SConsumer implements Consumer<FileRecord> {
     private final SDParam sdRealHostname;
     private final SDParam sdSourceModule = new SDParam("source_module", "k8s_01");
     private final SDParam sdIdSource = new SDParam("id_source", "source");
+    private static final KubernetesLogFilePOJO emptyRecord = new KubernetesLogFilePOJOStub();
+    AtomicReference<KubernetesLogFilePOJO> lastRecord = new AtomicReference<>(emptyRecord);
     K8SConsumer(
             AppConfig appConfig,
             KubernetesCachingAPIClient cacheClient,
@@ -86,101 +88,66 @@ public class K8SConsumer implements Consumer<FileRecord> {
         appConfig.getKubernetes().getMetadata().forEach(sdAdditionalMetadata::addSDParam);
     }
     @Override
-    public void accept(FileRecord record) {
+    public void accept(FileRecord fileRecord) {
+        KubernetesLogFilePOJO log = new ByteRecord(fileRecord.getRecord()).toKubePOJO();
+        if (lastRecord.get().isStub() && !log.isPartial()) {
+            LOGGER.debug("Sending a standalone record");
+            sendMessage(fileRecord, log);
+        }
+        else if (lastRecord.get().isStub() && log.isPartial()) {
+            LOGGER.debug("Starting a new partial record");
+            lastRecord.set(log);
+        }
+        else if (log.isPartial()) {
+            LOGGER.debug("Appending to existing partial record");
+            lastRecord.set(lastRecord.get().append(log.payloads()));
+        }
+        else if (!lastRecord.get().isStub()) {
+            LOGGER.debug("Finishing a partial record");
+            sendMessage(fileRecord, lastRecord.get().append(log.payloads()));
+        }
+        else {
+            throw new RuntimeException("FileRecord is at impossible state");
+        }
+    }
 
+    public void sendMessage(FileRecord fileRecord, KubernetesLogFilePOJO log) {
             UUID uuid = java.util.UUID.randomUUID();
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug(
                         "[{}] Got a new record from file: {}",
                         uuid,
-                        record.getPath()
+                        fileRecord.getPath()
                 );
                 LOGGER.debug(
                         "[{}] Reading {} starting from {}, file progress {}/{}",
                         uuid,
-                        record.getRecord().length,
-                        record.getStartOffset(),
-                        (int) (record.getStartOffset() + record.getRecord().length),
-                        record.getEndOffset()
+                        fileRecord.getRecord().length,
+                        fileRecord.getStartOffset(),
+                        (int) (fileRecord.getStartOffset() + fileRecord.getRecord().length),
+                        fileRecord.getEndOffset()
                 );
             }
-            String namespace = ContainerInfo.getNamespace(record.getFilename());
-            String podname = ContainerInfo.getPodname(record.getFilename());
-            String containerId = ContainerInfo.getContainerID(record.getFilename());
-            KubernetesLogFilePOJO log;
-            try {
-                // We want to read the kubernetes log event into a POJO
-                log = gson.fromJson(new String(record.getRecord(), StandardCharsets.UTF_8), KubernetesLogFilePOJO.class);
-            } catch (JsonParseException e) {
-                LOGGER.trace(
-                        "[{}] Invalid syntax message: {}",
-                        uuid,
-                        new String(record.getRecord(), StandardCharsets.UTF_8)
-                );
-                throw new RuntimeException(
-                        String.format(
-                                "[%s] Event from pod <%s>/<%s> on container <%s> in file <%s> offset <%s> can't be parsed properly: %s",
-                                uuid,
-                                namespace,
-                                podname,
-                                containerId,
-                                record.getPath(),
-                                record.getStartOffset(),
-                                e.getMessage()
-                        )
-                );
-            }
-
-            // Log is in invalid format if timestamp is not available
-            if(log == null || log.getTimestamp() == null) {
-                LOGGER.debug(
-                        "[{}] Can't parse this properly: {}",
-                        uuid,
-                        new String(record.getRecord(), StandardCharsets.UTF_8)
-                );
-                throw new RuntimeException(
-                    String.format(
-                        "[%s] Didn't find expected values for event from pod <%s> on container <%s> in file %s/%s at offset %s",
-                        uuid,
-                        namespace,
-                        podname,
-                        containerId,
-                        record.getPath(),
-                        record.getStartOffset()
-                    )
-                );
-            }
+            String namespace = ContainerInfo.getNamespace(fileRecord.getFilename());
+            String podname = ContainerInfo.getPodname(fileRecord.getFilename());
+            String containerId = ContainerInfo.getContainerID(fileRecord.getFilename());
             Instant instant;
             try {
-                instant = Instant.parse(log.getTimestamp());
+                instant = Instant.parse(log.timestamp());
             }
             catch(DateTimeParseException e) {
                 throw new RuntimeException(
                         String.format(
                                 "[%s] Can't parse timestamp <%s> properly for event from pod <[%s]> on container <%s> in file %s/%s at offset %s: ",
                                 uuid,
-                                log.getTimestamp(),
+                                log.timestamp(),
                                 namespace,
                                 podname,
                                 containerId,
-                                record.getPath(),
-                                record.getStartOffset()
+                                fileRecord.getPath(),
+                                fileRecord.getStartOffset()
                         ),
                         e
-                );
-            }
-            if(instant == null) {
-                throw new RuntimeException(
-                        String.format(
-                                "[%s] Unknown failure while parsing timestamp <%s> for event from pod <[%s]> on container <%s> in file %s/%s at offset %s",
-                                uuid,
-                                log.getTimestamp(),
-                                namespace,
-                                podname,
-                                containerId,
-                                record.getPath(),
-                                record.getStartOffset()
-                        )
                 );
             }
             ZonedDateTime zdt = instant.atZone(timezoneId);
@@ -215,7 +182,7 @@ public class K8SConsumer implements Consumer<FileRecord> {
             KubernetesMetadata kubernetesMetadata = new KubernetesMetadata(
                     namespaceMetadataContainer,
                     podMetadataContainer,
-                    ContainerInfo.getContainerName(record.getFilename()),
+                    ContainerInfo.getContainerName(fileRecord.getFilename()),
                     apiUrl
             );
             JsonObject dockerMetadata = new JsonObject();
@@ -235,11 +202,11 @@ public class K8SConsumer implements Consumer<FileRecord> {
             }
             else {
                 hostname = podMetadataContainer.getLabels().getOrDefault(
-                        appConfig.getKubernetes().getLabels().getHostname().getLabel(log.getStream()),
+                        appConfig.getKubernetes().getLabels().getHostname().getLabel(log.stream()),
                         appConfig.getKubernetes().getLabels().getHostname().getFallback()
                 );
                 appName = podMetadataContainer.getLabels().getOrDefault(
-                        appConfig.getKubernetes().getLabels().getAppName().getLabel(log.getStream()),
+                        appConfig.getKubernetes().getLabels().getAppName().getLabel(log.stream()),
                         appConfig.getKubernetes().getLabels().getAppName().getFallback()
                 );
             }
@@ -314,11 +281,11 @@ public class K8SConsumer implements Consumer<FileRecord> {
             final SDElement sdMetadata = new SDElement("kubernetesmeta@48577");
             sdMetadata.addSDParam("kubernetes", kubernetesMetadata.toString());
             sdMetadata.addSDParam("docker", dockerMetadata.toString());
-            sdMetadata.addSDParam("stream", log.getStream());
+            sdMetadata.addSDParam("stream", log.stream());
 
             final SDElement sdEventNodeSource = new SDElement("event_node_source@48577");
             sdEventNodeSource.addSDParam(sdRealHostname);
-            sdEventNodeSource.addSDParam("source", record.getPath());
+            sdEventNodeSource.addSDParam("source", fileRecord.getPath());
             sdEventNodeSource.addSDParam(sdSourceModule);
 
             final SDElement sdEventId = new SDElement("event_id@48577");
@@ -337,6 +304,12 @@ public class K8SConsumer implements Consumer<FileRecord> {
                     uuid,
                     dockerMetadata
             );
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            List<KubernetesPayloadPOJO> payloads = log.payloads();
+            for(KubernetesPayloadPOJO payload : payloads) {
+                byteArrayOutputStream.writeBytes(payload.payload());
+            }
+
             SyslogMessage syslog = new SyslogMessage()
                     .withTimestamp(timestamp, true)
                     .withSeverity(Severity.WARNING)
@@ -348,7 +321,7 @@ public class K8SConsumer implements Consumer<FileRecord> {
                     .withSDElement(sdEventNodeSource)
                     .withSDElement(sdEventId)
                     .withSDElement(sdMetadata)
-                    .withMsg(log.getLog());
+                    .withMsg(byteArrayOutputStream.toString(StandardCharsets.UTF_8));
             try {
                 RelpOutput output = relpOutputPool.take();
                 output.send(syslog);
@@ -356,5 +329,6 @@ public class K8SConsumer implements Consumer<FileRecord> {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+            lastRecord.set(emptyRecord);
     }
 }

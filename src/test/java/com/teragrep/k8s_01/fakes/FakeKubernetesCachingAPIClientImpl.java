@@ -15,16 +15,21 @@
    limitations under the License.
 */
 
-package com.teragrep.k8s_01;
+package com.teragrep.k8s_01.fakes;
 
-import com.teragrep.stb_01.Stubable;
+import com.teragrep.k8s_01.KubernetesCachingAPIClient;
+import com.teragrep.k8s_01.metadata.NamespaceMetadataContainer;
+import com.teragrep.k8s_01.metadata.PodMetadataContainer;
 
-import java.util.List;
+public class FakeKubernetesCachingAPIClientImpl implements KubernetesCachingAPIClient {
 
-public interface KubernetesLogFilePOJO extends Stubable {
-    String timestamp();
-    String stream();
-    boolean isPartial();
-    List<KubernetesPayloadPOJO> payloads();
-    KubernetesLogFilePOJO append(List<KubernetesPayloadPOJO> payload);
+    @Override
+    public PodMetadataContainer getPod(String namespace, String id) {
+        return new FakePodMetadataContainerImpl();
+    }
+
+    @Override
+    public NamespaceMetadataContainer getNamespace(String namespace) {
+        return new FakeNamespaceMetadataContainerImpl();
+    }
 }

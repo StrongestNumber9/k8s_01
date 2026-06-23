@@ -1,0 +1,48 @@
+{
+  "metrics": {
+    "port": 12345
+  },
+  "kubernetes": {
+    "metadata": {
+      "cluster": "example",
+      "tls": "false"
+    },
+    "logdir": "src/test/resources/logfiles",
+    "timezone": "Europe/Helsinki",
+    "cacheExpireInterval": 300,
+    "cacheMaxEntries": 4096,
+    "labels": {
+      "hostname": {
+        "fallback": "fallback-hostname",
+        "labelStdout": "host",
+        "labelStderr": "host-stderr"
+      },
+      "appname": {
+        "fallback": "fallback-appname",
+        "labelStdout": "app",
+        "labelStderr":  "app-stderr"
+      },
+      "whitelist": {
+        "enabled": false,
+        "label": "collect"
+      }
+    },
+    "logfiles": [
+      "example-input_teragrep_.*"
+    ],
+    "maxLogReadingThreads": 3
+  },
+  "relp": {
+    "target": "127.0.0.1",
+    "port": 1601,
+    "tls": {
+      "enabled": false,
+      "password": null,
+      "keystore": null
+    },
+    "connectionTimeout": 5000,
+    "readTimeout": 5000,
+    "writeTimeout": 5000,
+    "reconnectInterval": 5000
+  }
+}
